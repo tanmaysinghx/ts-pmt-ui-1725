@@ -22,7 +22,7 @@ export class LoginComponent {
   }
 
   ngOnInit() {
-    this.authService.clearToken();
+    // /this.authService.clearToken();
   }
 
   get showEmailError() {

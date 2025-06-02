@@ -59,7 +59,7 @@ export class NavBarComponent {
   ) { }
 
   ngOnInit() {
-    console.trace('Header rendered');
+    
   }
 
   // Close dropdown when clicking outside

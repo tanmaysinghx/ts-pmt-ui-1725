@@ -4,10 +4,11 @@ import { BreadcrumpComponent } from "../../shared/components/breadcrump/breadcru
 import { RouterModule } from '@angular/router';
 import { NavBarComponent } from "../../shared/components/nav-bar/nav-bar.component";
 import { User } from '../../models/user.model';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-layout-user',
-  imports: [RouterModule, LeftMenuComponent, BreadcrumpComponent, NavBarComponent],
+  imports: [RouterModule, LeftMenuComponent, BreadcrumpComponent, NavBarComponent, CommonModule],
   templateUrl: './layout-user.component.html',
   styleUrl: './layout-user.component.scss'
 })

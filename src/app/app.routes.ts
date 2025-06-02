@@ -4,6 +4,7 @@ import { LoginComponent } from './features/auth/components/login/login.component
 import { LayoutUserComponent } from './layouts/layout-user/layout-user.component';
 import { LayoutPreloginComponent } from './layouts/layout-prelogin/layout-prelogin.component';
 import { AuthGuard } from './core/guards/auth.guard';
+import { DashboardUserComponent } from './features/dashboard/components/dashboard-user/dashboard-user.component';
 
 export const routes: Routes = [
     {
@@ -21,9 +22,9 @@ export const routes: Routes = [
         component: LayoutUserComponent,
         canActivate: [AuthGuard],
         children: [
-            // { path: 'dashboard', component: DashboardComponent },
-            // // more authenticated routes here...
-            // { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
+            { path: 'dashboard', component: DashboardUserComponent },
+            // more authenticated routes here...
+            { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
         ]
     },
 ];

@@ -17,10 +17,12 @@ export class AuthService {
   }
 
   setRefreshToken(token: string) {
+    console.log('Setting refresh token:', token)
     localStorage.setItem(this.tokenKey, token);
   }
 
   isAuthenticated(token: string, refreshToken: string): Observable<boolean> {
+    console.log('Checking authentication with token:', token, 'and refreshToken:', refreshToken);
     return this.validateToken(token).pipe(
       map((data: any) => {
         if (data.success && data.data.userId) {
@@ -65,7 +67,7 @@ export class AuthService {
 
   clearToken() {
     localStorage.removeItem(this.tokenKey);
-    localStorage.removeItem(this.refreshToken);
+    //localStorage.removeItem(this.refreshToken);
   }
 
   logout() {

@@ -1,24 +1,21 @@
-<div class="flex h-screen overflow-hidden bg-gray-100 dark:bg-neutral-900">
-  <!-- Sidebar -->
-  <!-- <div [class.w-64]="sidebarOpen" 
-       [class.-translate-x-full]="!sidebarOpen"
-       [class.md:translate-x-0]="true"
-       class="fixed md:relative z-30 h-full transition-all duration-300 transform bg-white dark:bg-neutral-800 shadow-lg border-r dark:border-neutral-700">
+<div class="relative flex h-screen overflow-hidden bg-gray-100 dark:bg-neutral-900">
+
+  <!-- Sidebar: fixed, full height, left 0, above everything -->
+  <div [class.translate-x-0]="sidebarOpen" [class.-translate-x-full]="!sidebarOpen"
+    class="fixed top-0 left-0 z-50 h-full w-64 transform bg-white dark:bg-neutral-800 shadow-lg border-r dark:border-neutral-700 transition-transform duration-300 ease-in-out">
     <app-left-menu></app-left-menu>
-  </div> -->
+  </div>
 
-  <!-- Main Content -->
+  <!-- Optional overlay when sidebar open on mobile -->
+  <div *ngIf="sidebarOpen" (click)="sidebarOpen = false" class="fixed inset-0 z-40 bg-black bg-opacity-50 md:hidden">
+  </div>
+
+  <!-- Main content + Navbar -->
   <div class="flex flex-col flex-1 min-w-0">
-    <!-- Top Navbar -->
-    <app-nav-bar 
-      [user]="currentUser" 
-      [unreadNotifications]="notificationCount">
-    </app-nav-bar>
+    <!-- Navbar -->
+    <app-nav-bar [user]="currentUser" [unreadNotifications]="notificationCount" class="relative z-10"></app-nav-bar>
 
-    <!-- Breadcrumb -->
-    <!-- <app-breadcrumb></app-breadcrumb> -->
-
-    <!-- Router Content -->
+    <!-- Content -->
     <main class="flex-1 overflow-auto p-4">
       <div class="max-w-full mx-auto">
         <router-outlet></router-outlet>

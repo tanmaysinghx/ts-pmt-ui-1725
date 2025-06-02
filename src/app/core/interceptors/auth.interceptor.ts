@@ -1,69 +1,40 @@
-import {
-    HttpInterceptor,
-    HttpRequest,
-    HttpHandler,
-    HttpEvent,
-    HttpErrorResponse
-} from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable, throwError, BehaviorSubject } from 'rxjs';
-import { catchError, filter, take, switchMap } from 'rxjs/operators';
+// auth.interceptor.ts
+import { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
 import { AuthService } from '../../features/auth/services/sso.service';
+import { HttpRequest, HttpHandlerFn, HttpEvent, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
 
-@Injectable()
-export class AuthInterceptor implements HttpInterceptor {
-    private isRefreshing = false;
-    private readonly refreshTokenSubject: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
+export const AuthInterceptor: HttpInterceptorFn = (
+    req: HttpRequest<any>,
+    next: HttpHandlerFn
+): Observable<HttpEvent<any>> => {
+    const authService = inject(AuthService);
+    const token = authService.getToken();
+    console.log('AuthInterceptorFn: intercepting', req.url, token);
 
-    constructor(private readonly authService: AuthService) { }
-
-    intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-        const token = this.authService.getToken();
-        console.log('AuthInterceptor: Intercepting request', req.url, 'with token:', token);
-        if (token) {
-            req = this.addToken(req, token);
-        }
-        return next.handle(req).pipe(
-            catchError((error: HttpErrorResponse) => {
-                if (error.status === 500) {
-                    return this.handle401Error(req, next);
-                }
-                return throwError(() => error);
-            })
-        );
+    if (token) {
+        req = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
     }
 
-    private addToken(request: HttpRequest<any>, token: string) {
-        return request.clone({
-            setHeaders: {
-                Authorization: `Bearer ${token}`
+    return next(req).pipe(
+        catchError((error: HttpErrorResponse) => {
+            if (error.status === 500 || error.status === 401) {
+                return authService.generateTokenFromRefreshToken().pipe(
+                    switchMap((newToken: any) => {
+                        console.log('AuthInterceptorFn: new token received', newToken.data.accessToken);
+                        authService.setRefreshToken(newToken.data.accessToken);
+                        const newReq = req.clone({ setHeaders: { Authorization: `Bearer ${newToken}` } });
+                        return next(newReq);
+                    }),
+                    catchError((err) => {
+                        authService.logout();
+                        return throwError(() => err);
+                    })
+                );
             }
-        });
-    }
-
-    private handle401Error(request: HttpRequest<any>, next: HttpHandler) {
-        if (!this.isRefreshing) {
-            this.isRefreshing = true;
-            this.refreshTokenSubject.next(null);
-            return this.authService.generateTokenFromRefreshToken().pipe(
-                switchMap((token: string) => {
-                    this.isRefreshing = false;
-                    this.authService.setRefreshToken(token);
-                    this.refreshTokenSubject.next(token);
-                    return next.handle(this.addToken(request, token));
-                }),
-                catchError((err) => {
-                    this.isRefreshing = false;
-                    this.authService.logout();
-                    return throwError(() => err);
-                })
-            );
-        } else {
-            return this.refreshTokenSubject.pipe(
-                filter(token => token != null),
-                take(1),
-                switchMap(token => next.handle(this.addToken(request, token!)))
-            );
-        }
-    }
-}
+            return throwError(() => error);
+        })
+    );
+};
