@@ -1,0 +1,121 @@
+<!-- header.component.html -->
+<header
+  class="sticky top-0 inset-x-0 flex flex-wrap md:justify-start md:flex-nowrap z-48 w-full bg-white border-b border-gray-200 text-sm py-2.5 lg:ps-65 dark:bg-neutral-800 dark:border-neutral-700">
+  <nav class="px-4 sm:px-6 flex basis-full items-center w-full mx-auto">
+    <!-- Logo (Mobile) -->
+    <div class="me-5 lg:me-0 lg:hidden flex items-center">
+      <a class="flex-none rounded-md text-xl inline-block font-semibold focus:outline-none focus:opacity-80"
+        routerLink="/" aria-label="Preline">
+        <svg class="w-28 h-auto" width="116" height="32" viewBox="0 0 116 32" fill="none"
+          xmlns="http://www.w3.org/2000/svg">
+          <!-- Logo SVG content -->
+        </svg>
+      </a>
+    </div>
+
+    <div class="w-full flex items-center justify-end ms-auto md:justify-between gap-x-1 md:gap-x-3">
+      <!-- Search Input -->
+      <div class="relative w-full max-w-md">
+        <div class="absolute inset-y-0 start-0 flex items-center pointer-events-none z-20 ps-3.5">
+          <svg class="shrink-0 size-4 text-gray-400 dark:text-white/60" xmlns="http://www.w3.org/2000/svg" width="24"
+            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+        </div>
+
+        <input type="text" [(ngModel)]="searchTerm" (keyup.enter)="onSearch()" placeholder="Search" class="py-2 ps-10 pe-16 block w-full bg-white border border-gray-300 rounded-lg text-sm 
+                 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
+                 disabled:opacity-50 disabled:pointer-events-none 
+                 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 
+                 dark:placeholder:text-neutral-400 dark:focus:ring-blue-500" aria-label="Search" />
+
+        <!-- Shortcut Keys -->
+        <div class="absolute inset-y-0 end-0 flex items-center pointer-events-none z-20 pe-3 text-gray-400">
+          <span class="flex items-center gap-1 text-xs">
+            <kbd class="px-1 py-0.5 bg-gray-100 dark:bg-neutral-700 rounded">Ctrl</kbd>
+            <span class="text-gray-300 dark:text-neutral-600 mx-0.5">/</span>
+            <kbd class="px-1 py-0.5 bg-gray-100 dark:bg-neutral-700 rounded">K</kbd>
+          </span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-1 ml-2">
+        <!-- Mobile Search Toggle -->
+        <button type="button" class="md:hidden size-9.5 flex justify-center items-center text-sm font-semibold rounded-full 
+                 border border-transparent text-gray-800 hover:bg-gray-100 focus:outline-none 
+                 focus:bg-gray-100 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+          (click)="toggleMobileSearch()" aria-label="Toggle search">
+          <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+        </button>
+
+        <!-- Notifications -->
+        <button type="button" class="size-9.5 relative flex justify-center items-center text-sm font-semibold rounded-full 
+                 border border-transparent text-gray-800 hover:bg-gray-100 focus:outline-none 
+                 focus:bg-gray-100 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+          (click)="openNotifications()" [attr.aria-label]="'Notifications'">
+          <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+          </svg>
+          <span *ngIf="unreadNotifications > 0" class="absolute top-0 end-0 inline-flex items-center justify-center size-4 bg-red-500 text-white 
+                       text-[10px] font-medium rounded-full">
+            {{ unreadNotifications > 9 ? '9+' : unreadNotifications }}
+          </span>
+        </button>
+
+        <!-- Profile Dropdown -->
+        <div class="hs-dropdown relative">
+          <button type="button" class="size-9.5 inline-flex justify-center items-center gap-x-2 text-sm font-semibold 
+                   rounded-full border border-transparent text-gray-800 focus:outline-none 
+                   dark:text-white" (click)="toggleDropdown()" [attr.aria-expanded]="isDropdownOpen"
+            [attr.aria-label]="'User menu'">
+            <img class="shrink-0 size-9.5 rounded-full" [src]="user?.avatar || 'assets/images/default-avatar.png'"
+              alt="User avatar" width="38" height="38">
+          </button>
+
+          <div class="hs-dropdown-menu transition-[opacity,margin] duration-300 absolute right-0 mt-2 min-w-60 
+                   bg-white shadow-md rounded-lg dark:bg-neutral-800 dark:border dark:border-neutral-700 
+                   dark:divide-neutral-700" [class.opacity-100]="isDropdownOpen" [class.opacity-0]="!isDropdownOpen"
+            [class.invisible]="!isDropdownOpen" [class.visible]="isDropdownOpen" role="menu">
+            <!-- User Info -->
+            <div class="py-3 px-5 bg-gray-100 rounded-t-lg dark:bg-neutral-700">
+              <p class="text-sm text-gray-500 dark:text-neutral-500">
+                {{ 'Signed in as' }}
+              </p>
+              <p class="text-sm font-medium text-gray-800 dark:text-neutral-200 truncate">
+                {{ user?.email || 'Guest' }}
+              </p>
+            </div>
+
+            <!-- Menu Items -->
+            <div class="p-1.5">
+              <ng-container *ngFor="let item of dropdownItems">
+                <a *ngIf="item.type === 'link'" class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 
+                          hover:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700" [routerLink]="item.link"
+                  (click)="handleDropdownClick(item)" role="menuitem">
+                  <svg class="shrink-0 size-4" [innerHTML]="(item.icon || '') | safeHtml"></svg>
+                  {{ item.label }}
+                </a>
+
+                <button *ngIf="item.type === 'action'" class="w-full flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 
+                          hover:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700"
+                  (click)="handleDropdownClick(item)" role="menuitem">
+                  <svg class="shrink-0 size-4" [innerHTML]="(item.icon || '') | safeHtml"></svg>
+                  {{ item.label }}
+                </button>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
