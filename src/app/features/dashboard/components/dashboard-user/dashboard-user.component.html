@@ -1,1 +1,485 @@
-<p>dashboard-user works!</p>
+<!-- Updated Dashboard Layout with Full Sections and Charts -->
+<div class="p-4 space-y-6">
+
+    <!-- Section 4: Quick Stats Cards For Scrum -->
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <!-- Active Projects -->
+        <div class="bg-blue-50 dark:bg-neutral-800 shadow rounded-2xl p-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-sm text-blue-700 dark:text-blue-400">Active Projects</h3>
+                    <p class="text-2xl font-bold text-blue-900 dark:text-white">12</p>
+                </div>
+                <span class="text-3xl text-blue-500">📁</span>
+            </div>
+        </div>
+
+        <!-- Open Tickets -->
+        <div class="bg-red-50 dark:bg-neutral-800 shadow rounded-2xl p-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-sm text-red-700 dark:text-red-400">Open Tickets</h3>
+                    <p class="text-2xl font-bold text-red-900 dark:text-white">8</p>
+                </div>
+                <span class="text-3xl text-red-500">🎫</span>
+            </div>
+        </div>
+
+        <!-- Access Requests -->
+        <div class="bg-yellow-50 dark:bg-neutral-800 shadow rounded-2xl p-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-sm text-yellow-700 dark:text-yellow-400">Access Requests</h3>
+                    <p class="text-2xl font-bold text-yellow-900 dark:text-white">4 Pending</p>
+                </div>
+                <span class="text-3xl text-yellow-500">🔐</span>
+            </div>
+        </div>
+
+        <!-- Tickets for My Attention -->
+        <div class="bg-purple-50 dark:bg-neutral-800 shadow rounded-2xl p-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-sm text-purple-700 dark:text-purple-400">Tickets for My Attention</h3>
+                    <p class="text-2xl font-bold text-purple-900 dark:text-white">5</p>
+                </div>
+                <span class="text-3xl text-purple-600">🎯</span>
+            </div>
+        </div>
+
+        <!-- System Uptime -->
+        <div class="bg-green-50 dark:bg-neutral-800 shadow rounded-2xl p-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-sm text-green-700 dark:text-green-400">System Uptime</h3>
+                    <p class="text-2xl font-bold text-green-900 dark:text-white">99.99%</p>
+                </div>
+                <span class="text-3xl text-green-500">📶</span>
+            </div>
+        </div>
+
+        <!-- Average Service Response Time -->
+        <div class="bg-sky-50 dark:bg-neutral-800 shadow rounded-2xl p-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-sm text-sky-700 dark:text-sky-400">Avg. Service Response Time</h3>
+                    <p class="text-2xl font-bold text-sky-900 dark:text-white">320 ms</p>
+                </div>
+                <span class="text-3xl text-sky-500">🕒</span>
+            </div>
+        </div>
+
+        <!-- Critical Services -->
+        <div class="bg-amber-50 dark:bg-neutral-800 shadow rounded-2xl p-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-sm text-amber-700 dark:text-amber-400">Critical Services</h3>
+                    <p class="text-2xl font-bold text-amber-900 dark:text-white">5</p>
+                </div>
+                <span class="text-3xl text-amber-500">🚨</span>
+            </div>
+        </div>
+
+        <!-- Services Down -->
+        <div class="bg-rose-50 dark:bg-neutral-800 shadow rounded-2xl p-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-sm text-rose-700 dark:text-rose-400">Services Down</h3>
+                    <p class="text-2xl font-bold text-rose-900 dark:text-white">2</p>
+                </div>
+                <span class="text-3xl text-rose-500">❌</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Section 2: Live Service Monitoring Charts -->
+    <div class="bg-white dark:bg-neutral-800 rounded-2xl p-4 shadow">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Live Service Monitoring</h2>
+        <apx-chart [series]="cpuChart.series" [chart]="cpuChart.chart" [xaxis]="cpuChart.xaxis"></apx-chart>
+    </div>
+
+    <!-- Section 3: Incident Overview Row -->
+    <!-- Incident Overview Section -->
+    <div class="grid grid-cols-1 xl:grid-cols-5 gap-4">
+        <!-- Chart Column -->
+        <div class="xl:col-span-3 bg-white dark:bg-neutral-800 p-4 rounded-2xl shadow">
+            <h2 class="text-md font-semibold text-gray-900 dark:text-white mb-2">Incident Overview</h2>
+            <apx-chart [series]="incidentChart.series" [chart]="incidentChart.chart" [xaxis]="incidentChart.xaxis"
+                [tooltip]="incidentChart.tooltip!" [stroke]="incidentChart.stroke!"
+                [dataLabels]="incidentChart.dataLabels!"></apx-chart>
+        </div>
+
+        <!-- Summary Cards Column -->
+        <div class="xl:col-span-2 grid grid-cols-2 md:grid-cols-4 xl:grid-cols-2 gap-4">
+            <!-- Critical -->
+            <div
+                class="flex flex-col items-center bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 p-4 rounded-2xl shadow">
+                <div class="text-2xl mb-1">🚨</div>
+                <h4 class="text-sm font-semibold">Critical</h4>
+                <p class="text-2xl font-bold">7</p>
+            </div>
+
+            <!-- High -->
+            <div
+                class="flex flex-col items-center bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 p-4 rounded-2xl shadow">
+                <div class="text-2xl mb-1">⚠️</div>
+                <h4 class="text-sm font-semibold">High</h4>
+                <p class="text-2xl font-bold">10</p>
+            </div>
+
+            <!-- Resolved -->
+            <div
+                class="flex flex-col items-center bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 p-4 rounded-2xl shadow">
+                <div class="text-2xl mb-1">✅</div>
+                <h4 class="text-sm font-semibold">Resolved</h4>
+                <p class="text-2xl font-bold">15</p>
+            </div>
+
+            <!-- Pending -->
+            <div
+                class="flex flex-col items-center bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 p-4 rounded-2xl shadow">
+                <div class="text-2xl mb-1">⏳</div>
+                <h4 class="text-sm font-semibold">Pending</h4>
+                <p class="text-2xl font-bold">5</p>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Section 4: Recent Activity Feed (Compact Version) -->
+    <div class="bg-white dark:bg-neutral-800 rounded-2xl p-4 shadow">
+        <h2 class="text-md font-semibold text-gray-900 dark:text-white mb-3">Recent Activity</h2>
+        <ul class="space-y-1 text-sm text-gray-800 dark:text-gray-200">
+
+            <li class="flex items-center gap-2">
+                <span class="text-yellow-500 text-base">🔧</span>
+                <span><b>Alice</b> raised an Incident: <i class="text-gray-600 dark:text-gray-400">Database latency
+                        spike</i></span>
+            </li>
+
+            <li class="flex items-center gap-2">
+                <span class="text-green-500 text-base">✅</span>
+                <span>Ticket <b>#584</b> resolved by <b>DevOps</b></span>
+            </li>
+
+            <li class="flex items-center gap-2">
+                <span class="text-blue-500 text-base">📤</span>
+                <span><b>Bob</b> requested access to <i class="text-gray-600 dark:text-gray-400">GitHub Admin</i></span>
+            </li>
+
+            <li class="flex items-center gap-2">
+                <span class="text-purple-500 text-base">📈</span>
+                <span>Project <b>Migration</b> updated: <b>80%</b> complete</span>
+            </li>
+
+        </ul>
+    </div>
+
+
+
+    <!-- Section 5: Quick Stats Cards -->
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <!-- Total User Stories -->
+        <div class="bg-indigo-50 dark:bg-neutral-800 shadow rounded-2xl p-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-sm text-indigo-700 dark:text-indigo-400">Total User Stories</h3>
+                    <p class="text-2xl font-bold text-indigo-800 dark:text-indigo-300">7</p>
+                </div>
+                <span class="text-3xl text-indigo-600">📝</span>
+            </div>
+        </div>
+
+        <!-- Assigned Stories -->
+        <div class="bg-orange-50 dark:bg-neutral-800 shadow rounded-2xl p-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-sm text-orange-700 dark:text-orange-400">Assigned Stories</h3>
+                    <p class="text-2xl font-bold text-orange-800 dark:text-orange-300">4</p>
+                </div>
+                <span class="text-3xl text-orange-500">📌</span>
+            </div>
+        </div>
+
+        <!-- Open Defects -->
+        <div class="bg-red-50 dark:bg-neutral-800 shadow rounded-2xl p-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-sm text-red-700 dark:text-red-400">Open Defects</h3>
+                    <p class="text-2xl font-bold text-red-800 dark:text-red-300">2</p>
+                </div>
+                <span class="text-3xl text-red-600">🐞</span>
+            </div>
+        </div>
+
+        <!-- Ongoing Sprint -->
+        <div class="bg-teal-50 dark:bg-neutral-800 shadow rounded-2xl p-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-sm text-teal-700 dark:text-teal-400">Ongoing Sprint</h3>
+                    <p class="text-2xl font-bold text-teal-800 dark:text-teal-300">Sprint 24</p>
+                </div>
+                <span class="text-3xl text-teal-500">🏃‍♂️</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 6: Sprint Burndown Chart -->
+    <div class="bg-white dark:bg-neutral-800 rounded-2xl p-4 shadow">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Sprint Burndown</h2>
+        <apx-chart [series]="burndownChart.series" [chart]="burndownChart.chart"
+            [xaxis]="burndownChart.xaxis"></apx-chart>
+    </div>
+
+    <!-- Section 7: Scrum Board Summary Table -->
+    <div class="bg-white dark:bg-neutral-800 rounded-2xl p-4 shadow">
+        <h2 class="text-md font-semibold text-gray-900 dark:text-white mb-4">Scrum Board Summary</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm text-left">
+                <thead class="text-xs uppercase text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-neutral-700">
+                    <tr>
+                        <th class="px-4 py-2 rounded-tl-lg">Task</th>
+                        <th class="px-4 py-2">Assignee</th>
+                        <th class="px-4 py-2">Status</th>
+                        <th class="px-4 py-2 rounded-tr-lg">ETA</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-800 dark:text-gray-100">
+                    <tr
+                        class="border-b border-gray-100 dark:border-neutral-700 even:bg-gray-50 even:dark:bg-neutral-700/40">
+                        <td class="px-4 py-2">Create API endpoints</td>
+                        <td class="px-4 py-2">Alice</td>
+                        <td class="px-4 py-2">
+                            <span
+                                class="inline-block px-2 py-1 text-xs font-medium bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-400 rounded">In
+                                Progress</span>
+                        </td>
+                        <td class="px-4 py-2">2 days</td>
+                    </tr>
+                    <tr
+                        class="border-b border-gray-100 dark:border-neutral-700 even:bg-gray-50 even:dark:bg-neutral-700/40">
+                        <td class="px-4 py-2">UI Integration</td>
+                        <td class="px-4 py-2">Bob</td>
+                        <td class="px-4 py-2">
+                            <span
+                                class="inline-block px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300 rounded">Review</span>
+                        </td>
+                        <td class="px-4 py-2">1 day</td>
+                    </tr>
+                    <tr
+                        class="border-b border-gray-100 dark:border-neutral-700 even:bg-gray-50 even:dark:bg-neutral-700/40">
+                        <td class="px-4 py-2">Setup Monitoring</td>
+                        <td class="px-4 py-2">Charlie</td>
+                        <td class="px-4 py-2">
+                            <span
+                                class="inline-block px-2 py-1 text-xs font-medium bg-red-100 text-red-700 dark:bg-red-700/20 dark:text-red-400 rounded">Pending</span>
+                        </td>
+                        <td class="px-4 py-2">3 days</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Section 8: Service Health Check -->
+    <div class="bg-white dark:bg-neutral-800 rounded-2xl p-4 shadow">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Service Health</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm text-left">
+                <thead
+                    class="text-xs uppercase text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-neutral-700">
+                    <tr>
+                        <th class="px-4 py-2">Service</th>
+                        <th class="px-4 py-2">Status</th>
+                        <th class="px-4 py-2">Response Time</th>
+                        <th class="px-4 py-2">Last Checked</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-800 dark:text-gray-100">
+                    <tr class="border-b border-gray-200 dark:border-neutral-700">
+                        <td class="px-4 py-2">Gateway Service</td>
+                        <td class="px-4 py-2 text-green-600 dark:text-green-400">✅ Healthy</td>
+                        <td class="px-4 py-2">120 ms</td>
+                        <td class="px-4 py-2">2 mins ago</td>
+                    </tr>
+                    <tr class="border-b border-gray-200 dark:border-neutral-700">
+                        <td class="px-4 py-2">Auth Service</td>
+                        <td class="px-4 py-2 text-yellow-600 dark:text-yellow-400">⚠️ Slow</td>
+                        <td class="px-4 py-2">480 ms</td>
+                        <td class="px-4 py-2">1 min ago</td>
+                    </tr>
+                    <tr class="border-b border-gray-200 dark:border-neutral-700">
+                        <td class="px-4 py-2">Notification Service</td>
+                        <td class="px-4 py-2 text-red-600 dark:text-red-400">❌ Down</td>
+                        <td class="px-4 py-2">—</td>
+                        <td class="px-4 py-2">Just now</td>
+                    </tr>
+                    <tr class="border-b border-gray-200 dark:border-neutral-700">
+                        <td class="px-4 py-2">Database Proxy</td>
+                        <td class="px-4 py-2 text-green-600 dark:text-green-400">✅ Healthy</td>
+                        <td class="px-4 py-2">95 ms</td>
+                        <td class="px-4 py-2">30 secs ago</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Section: Database Health Check -->
+    <div class="bg-white dark:bg-neutral-800 rounded-2xl p-4 shadow">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Database Health</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm text-left">
+                <thead class="bg-gray-50 dark:bg-neutral-700 text-gray-700 dark:text-gray-300 text-xs uppercase">
+                    <tr>
+                        <th class="px-4 py-2">DB Instance</th>
+                        <th class="px-4 py-2">Status</th>
+                        <th class="px-4 py-2">Connections</th>
+                        <th class="px-4 py-2">Latency</th>
+                        <th class="px-4 py-2">Region</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-800 dark:text-gray-100 divide-y divide-gray-200 dark:divide-neutral-700">
+                    <tr>
+                        <td class="px-4 py-2 font-medium">Postgres-Main</td>
+                        <td class="px-4 py-2">
+                            <span
+                                class="inline-block px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">
+                                Healthy
+                            </span>
+                        </td>
+                        <td class="px-4 py-2">72</td>
+                        <td class="px-4 py-2">89 ms</td>
+                        <td class="px-4 py-2">us-east-1</td>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-2 font-medium">Redis-Cache</td>
+                        <td class="px-4 py-2">
+                            <span
+                                class="inline-block px-2 py-0.5 text-xs rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300">
+                                Degraded
+                            </span>
+                        </td>
+                        <td class="px-4 py-2">35</td>
+                        <td class="px-4 py-2">320 ms</td>
+                        <td class="px-4 py-2">us-west-2</td>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-2 font-medium">MySQL-Reports</td>
+                        <td class="px-4 py-2">
+                            <span
+                                class="inline-block px-2 py-0.5 text-xs rounded-full bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300">
+                                Down
+                            </span>
+                        </td>
+                        <td class="px-4 py-2">—</td>
+                        <td class="px-4 py-2">—</td>
+                        <td class="px-4 py-2">eu-central-1</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Section: Deployed Services -->
+    <div class="bg-white dark:bg-neutral-800 rounded-2xl p-4 shadow">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Deployed Services</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm text-left">
+                <thead class="bg-gray-50 dark:bg-neutral-700 text-gray-700 dark:text-gray-300 text-xs uppercase">
+                    <tr>
+                        <th class="px-4 py-2">Service</th>
+                        <th class="px-4 py-2">Environment</th>
+                        <th class="px-4 py-2">Platform</th>
+                        <th class="px-4 py-2">Server</th>
+                        <th class="px-4 py-2">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-800 dark:text-gray-100 divide-y divide-gray-200 dark:divide-neutral-700">
+                    <tr>
+                        <td class="px-4 py-2 font-medium">Auth Service</td>
+                        <td class="px-4 py-2">
+                            <span
+                                class="inline-block px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300">
+                                Prod
+                            </span>
+                        </td>
+                        <td class="px-4 py-2">
+                            <span class="inline-flex items-center gap-1 text-green-700 dark:text-green-300">
+                                <svg class="w-4 h-4 inline" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 0l8.485 8.485-8.485 8.485-8.485-8.485z" />
+                                </svg>
+                                AWS
+                            </span>
+                        </td>
+                        <td class="px-4 py-2">ec2-auth-01</td>
+                        <td class="px-4 py-2">
+                            <span
+                                class="inline-block px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">
+                                Running
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-2 font-medium">Notification Service</td>
+                        <td class="px-4 py-2">
+                            <span
+                                class="inline-block px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300">
+                                QA
+                            </span>
+                        </td>
+                        <td class="px-4 py-2">
+                            <span class="inline-flex items-center gap-1 text-blue-700 dark:text-blue-300">
+                                <svg class="w-4 h-4 inline" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M5 3l14 9-14 9z" />
+                                </svg>
+                                Azure
+                            </span>
+                        </td>
+                        <td class="px-4 py-2">azr-notify-02</td>
+                        <td class="px-4 py-2">
+                            <span
+                                class="inline-block px-2 py-0.5 text-xs rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300">
+                                Pending
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-2 font-medium">User Profile</td>
+                        <td class="px-4 py-2">
+                            <span
+                                class="inline-block px-2 py-0.5 rounded-full bg-gray-200 text-gray-700 dark:bg-neutral-700 dark:text-gray-200">
+                                Dev
+                            </span>
+                        </td>
+                        <td class="px-4 py-2">
+                            <span class="inline-flex items-center gap-1 text-green-700 dark:text-green-300">
+                                <svg class="w-4 h-4 inline" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 0l8.485 8.485-8.485 8.485-8.485-8.485z" />
+                                </svg>
+                                AWS
+                            </span>
+                        </td>
+                        <td class="px-4 py-2">ec2-user-dev-03</td>
+                        <td class="px-4 py-2">
+                            <span
+                                class="inline-block px-2 py-0.5 text-xs rounded-full bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300">
+                                Down
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- Placeholder Areas for Sections 6 to 10 -->
+    <div class="bg-white dark:bg-neutral-800 rounded-2xl p-4 shadow text-gray-400 text-center">
+        <p>⬇️ More sections coming soon: Defect Summary, Incident Overview, Access Trends, Catalog Request Stats,
+            Product Monitoring Dashboard...</p>
+    </div>
+
+</div>

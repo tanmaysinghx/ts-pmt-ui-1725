@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../../services/sso.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -13,7 +14,7 @@ export class LoginComponent {
   loginForm: FormGroup;
   submitted = false;
 
-  constructor(private readonly fb: FormBuilder, private readonly authService: AuthService) {
+  constructor(private readonly fb: FormBuilder, private readonly authService: AuthService, private readonly router: Router) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required],
@@ -22,7 +23,19 @@ export class LoginComponent {
   }
 
   ngOnInit() {
-    // /this.authService.clearToken();
+    const token = this.authService.getAuthToken();
+    const refreshToken = this.authService.getRefreshToken();
+
+    if (token && refreshToken) {
+      this.authService.isAuthenticated(token, refreshToken).subscribe(isAuth => {
+        if (isAuth) {
+          this.router.navigate(['/dashboard']);
+        }
+      }, error => {
+        console.error('Error verifying token:', error);
+        this.authService.clearToken();
+      });
+    }
   }
 
   get showEmailError() {

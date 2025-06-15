@@ -9,16 +9,34 @@ import { catchError, map, of } from 'rxjs';
 export class AuthService {
   private readonly tokenKey = 'auth_token';
   private readonly refreshToken = 'refresh_token';
-  constructor(private readonly router: Router, private readonly http: HttpClient, private readonly route: ActivatedRoute) { }
+
+  constructor(
+    private readonly router: Router,
+    private readonly http: HttpClient,
+    private readonly route: ActivatedRoute
+  ) { }
+
+  getAuthToken(): string | null {
+    return localStorage.getItem(this.tokenKey) ?? this.route.snapshot.queryParamMap.get('token');
+  }
+
+  getRefreshToken(): string | null {
+    return localStorage.getItem(this.refreshToken) ?? this.route.snapshot.queryParamMap.get('refreshtoken');
+  }
 
   setToken(token: string, refreshToken: string) {
     localStorage.setItem(this.tokenKey, token);
     localStorage.setItem(this.refreshToken, refreshToken);
   }
 
-  setRefreshToken(token: string) {
-    console.log('Setting refresh token:', token)
+  setAccessToken(token: string) {
+    console.log('Setting access token:', token);
     localStorage.setItem(this.tokenKey, token);
+  }
+
+  setRefreshToken(token: string) {
+    console.log('Setting refresh token:', token);
+    localStorage.setItem(this.refreshToken, token);
   }
 
   isAuthenticated(token: string, refreshToken: string): Observable<boolean> {
@@ -39,40 +57,28 @@ export class AuthService {
   }
 
   validateToken(token: string): Observable<any> {
-    let assetUrl = environment.ssoService + '/auth/verify/verify-token';
-    let body = {
-      "token": token
-    }
+    const assetUrl = environment.ssoService + '/auth/verify/verify-token';
+    const body = { token };
     return this.http.post(assetUrl, body);
   }
 
   generateTokenFromRefreshToken(): Observable<any> {
     const refreshToken = this.getRefreshToken();
-    let assetUrl = environment.ssoService + '/auth/refresh-token';
-    let body = {
-      "refreshToken": refreshToken
+    if (!refreshToken) {
+      throw new Error('No refresh token available');
     }
+    const assetUrl = environment.ssoService + '/auth/refresh-token';
+    const body = { "refreshToken": refreshToken };
     return this.http.post(assetUrl, body);
-  }
-
-  getToken(): string | null {
-    const token = this.route.snapshot.queryParamMap.get('token') ?? localStorage.getItem(this.tokenKey);
-    return token;
-  }
-
-  getRefreshToken(): string | null {
-    const refreshToken = this.route.snapshot.queryParamMap.get('refreshtoken') ?? localStorage.getItem(this.refreshToken);
-    return refreshToken;
   }
 
   clearToken() {
     localStorage.removeItem(this.tokenKey);
-    //localStorage.removeItem(this.refreshToken);
+    localStorage.removeItem(this.refreshToken);
   }
 
   logout() {
     this.clearToken();
     this.router.navigate(['/login']);
   }
-
 }
