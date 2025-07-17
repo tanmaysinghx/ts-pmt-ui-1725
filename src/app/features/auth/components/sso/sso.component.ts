@@ -72,7 +72,7 @@ export class SsoComponent implements OnInit {
     if (refreshToken) {
       this.authService.generateTokenFromRefreshToken().subscribe(
         (res) => {
-          if (res?.data?.token) {
+          if (res.data.downstreamResponse.microserviceResponse.data.token) {
             this.authService.setToken(res.data.token, refreshToken);
             const redirect = sessionStorage.getItem('redirectUrl') ?? '/dashboard';
             sessionStorage.removeItem('redirectUrl');

@@ -43,7 +43,7 @@ export class AuthService {
     console.log('Checking authentication with token:', token, 'and refreshToken:', refreshToken);
     return this.validateToken(token).pipe(
       map((data: any) => {
-        if (data.success && data.data.userId) {
+        if (data.success && data.data.downstreamResponse.microserviceResponse.data.userId) {
           this.setToken(token, refreshToken);
           return true;
         }
@@ -57,7 +57,7 @@ export class AuthService {
   }
 
   validateToken(token: string): Observable<any> {
-    const assetUrl = environment.ssoService + '/auth/verify/verify-token';
+    const assetUrl = environment.apiGatewayService + '/1625/v2/api/auth/verify/verify-token';
     const body = { token };
     return this.http.post(assetUrl, body);
   }
@@ -67,7 +67,7 @@ export class AuthService {
     if (!refreshToken) {
       throw new Error('No refresh token available');
     }
-    const assetUrl = environment.ssoService + '/auth/refresh-token';
+    const assetUrl = environment.apiGatewayService + '/1625/v2/api/auth/refresh-token';
     const body = { "refreshToken": refreshToken };
     return this.http.post(assetUrl, body);
   }

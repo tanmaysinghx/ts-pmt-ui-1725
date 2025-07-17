@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { LeftMenuComponent } from "../../shared/components/left-menu/left-menu.component";
-import { BreadcrumpComponent } from "../../shared/components/breadcrump/breadcrump.component";
 import { RouterModule } from '@angular/router';
 import { NavBarComponent } from "../../shared/components/nav-bar/nav-bar.component";
 import { User } from '../../models/user.model';
@@ -8,7 +7,7 @@ import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-layout-user',
-  imports: [RouterModule, LeftMenuComponent, BreadcrumpComponent, NavBarComponent, CommonModule],
+  imports: [RouterModule, LeftMenuComponent, NavBarComponent, CommonModule],
   templateUrl: './layout-user.component.html',
   styleUrl: './layout-user.component.scss'
 })

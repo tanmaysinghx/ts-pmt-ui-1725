@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { IStaticMethods } from 'preline/dist';
-import { SafeHtmlPipe } from './shared/pipes/safe-html.pipe';
 
 declare global {
   interface Window {
@@ -10,7 +9,7 @@ declare global {
 }
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, SafeHtmlPipe],
+  imports: [RouterOutlet],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   standalone: true,

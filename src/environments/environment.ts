@@ -7,7 +7,7 @@ export const environment = {
     cmsUrl: 'http://localhost:4200/',
     ssoService: 'http://localhost:1605/1625/auth-service/v2/api',
     umtService: 'http://localhost:1605/1689/notification-service',
-    apiGatewayService: 'https://ts-api-gateway-service-1605-z7txd.ondigitalocean.app/',
+    apiGatewayService: 'http://localhost:1605/api-gateway',
     ssoProdService: 'https://octopus-app-xmsre.ondigitalocean.app/v2/api/',
     tempUrl1: 'http://localhost:1625/v2/api'
 };
