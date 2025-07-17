@@ -35,18 +35,23 @@ export class LeftMenuComponent {
       children: [
         {
           name: "Create Ticket",
-          route: "/create-ticket",
+          route: "/tickets/create-ticket",
           icon: "<path d='M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 0 1 0 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 0 1 0-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375Z' />",
 
         },
         {
           name: "View Tickets",
-          route: "/tickets",
+          route: "/tickets/view-tickets",
+          icon: "<path d='M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z'/>"
+        },
+        {
+          name: "Search Tickets",
+          route: "/tickets/search-ticket",
           icon: "<path d='M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z'/>"
         },
         {
           name: "Assigned Tickets",
-          route: "/my-tickets",
+          route: "/tickets/assigned-tickets",
           icon: "<path d='M14 8c0-2.21-1.79-4-4-4S6 5.79 6 8s1.79 4 4 4 4-1.79 4-4zm-2 0c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zM2 18v2h16v-2c0-2.66-5.33-4-8-4s-8 1.34-8 4zm2 0c.2-.71 3.3-2 6-2 2.69 0 5.78 1.28 6 2H4z'/>"
         }
       ]
@@ -192,6 +197,25 @@ export class LeftMenuComponent {
           route: '/ExecuteRelease', 
           icon: '<path d="M3 3v18h18V3H3zm16 16H5V5h14v14z"></path><path d="M7 7h2v2H7zm0 4h2v2H7zm0 4h2v2H7zm4-8h2v2h-2zm0 4h2v2h-2zm0 4h2v2h-2z"></path>'
         }
+      ]
+    },
+    {
+      id: 'Profile',
+      name: 'Profile Management',  
+      route: '/',
+      icon: '<path d="M3 3v18h18V3H3zm16 16H5V5h14v14z"></path><path d="M7 7h2v2H7zm0 4h2v2H7zm0 4h2v2H7zm4-8h2v2h-2zm0 4h2v2h-2zm0 4h2v2h-2z"></path>',
+      isActive: false,
+      children: [   
+        {
+          name: 'View Profile',
+          route: '/profile/view',
+          icon: '<path d="M3 3v18h18V3H3zm16 16H5V5h14v14z"></path><path d="M7 7h2v2H7zm0 4h2v2H7zm0 4h2v2H7zm4-8h2v2h-2zm0 4h2v2h-2zm0 4h2v2h-2z"></path>'
+        },
+        {
+          name: 'Edit Profile',
+          route: '/profile/edit',
+          icon: '<path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"></path><path d="M7 7h10v10H7z"></path>'
+        },
       ]
     },
     {

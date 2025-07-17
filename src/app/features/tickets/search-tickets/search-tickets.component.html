@@ -1,0 +1,101 @@
+<div class="px-4 py-10 mx-auto">
+  <div class="bg-white border border-gray-200 rounded-xl shadow-sm px-6 py-8">
+
+    <!-- Title -->
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">Search Ticket</h1>
+
+    <!-- Search Bar -->
+    <div class="flex flex-col md:flex-row items-center gap-4 mb-6">
+      <input
+        type="text"
+        [(ngModel)]="searchQuery"
+        placeholder="Enter Ticket Number or Title"
+        class="w-full md:w-2/3 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 text-sm" />
+
+      <button
+        (click)="performSearch()"
+        class="w-full md:w-auto px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm">
+        Search
+      </button>
+    </div>
+
+    <!-- Suggestions -->
+    <div *ngIf="recentSearches.length > 0" class="mb-4">
+      <h2 class="text-sm font-semibold text-gray-600 mb-2">Recent Searches:</h2>
+      <div class="flex flex-wrap gap-2">
+        <span *ngFor="let suggestion of recentSearches"
+              (click)="selectSuggestion(suggestion)"
+              class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs cursor-pointer hover:bg-blue-100 transition">
+          {{ suggestion }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Results -->
+<div *ngIf="results.length > 0" class="grid gap-4">
+  <div *ngFor="let ticket of results"
+       class="border border-gray-200 rounded-lg p-5 shadow-sm bg-white hover:shadow transition">
+
+    <div class="flex flex-col md:flex-row justify-between gap-4 md:items-center">
+
+      <!-- Ticket Info -->
+      <div>
+        <h3 class="text-lg font-semibold text-blue-600 hover:underline cursor-pointer"
+            (click)="goToTicket(ticket.id)">
+          #{{ ticket.id }} — {{ ticket.title }}
+        </h3>
+
+        <!-- Metadata -->
+        <div class="flex flex-wrap items-center gap-3 mt-2 text-sm text-gray-600">
+          <span class="inline-flex items-center gap-1">
+            📂 Category: <span class="text-gray-800 font-medium">{{ ticket.category }}</span>
+          </span>
+
+          <span class="inline-flex items-center gap-1">
+            ⚡ Priority:
+            <span
+              [ngClass]="{
+                'bg-red-100 text-red-700': ticket.priority === 'Critical',
+                'bg-orange-100 text-orange-700': ticket.priority === 'High',
+                'bg-yellow-100 text-yellow-800': ticket.priority === 'Medium',
+                'bg-green-100 text-green-700': ticket.priority === 'Low'
+              }"
+              class="px-2 py-0.5 rounded-full text-xs font-medium">
+              {{ ticket.priority }}
+            </span>
+          </span>
+
+          <span class="inline-flex items-center gap-1">
+            🏷️ Status:
+            <span
+              [ngClass]="{
+                'bg-blue-100 text-blue-700': ticket.status === 'Open',
+                'bg-yellow-100 text-yellow-800': ticket.status === 'In Progress',
+                'bg-green-100 text-green-700': ticket.status === 'Resolved',
+                'bg-gray-200 text-gray-800': ticket.status === 'Closed'
+              }"
+              class="px-2 py-0.5 rounded-full text-xs font-medium">
+              {{ ticket.status }}
+            </span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Action Button -->
+      <div class="shrink-0">
+        <button
+          (click)="replicateTicket(ticket)"
+          class="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium">
+          Replicate Ticket
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+    <div *ngIf="!results.length && searched" class="text-gray-500 text-sm mt-6">
+      No tickets found. Try a different search.
+    </div>
+  </div>
+</div>
