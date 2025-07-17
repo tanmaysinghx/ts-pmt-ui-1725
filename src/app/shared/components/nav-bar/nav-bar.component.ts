@@ -101,6 +101,9 @@ export class NavBarComponent {
     if (item.action === 'logout') {
       this.logout();
     }
+    if (item.link === '/profile') {
+      this.router.navigate(['/profile/view']);
+    }
     this.isDropdownOpen = false;
   }
 
