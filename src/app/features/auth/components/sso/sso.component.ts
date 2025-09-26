@@ -1,100 +1,151 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../services/sso.service';
+// import { CookieService } from 'ngx-cookie-service';
+import { Subscription, interval } from 'rxjs';
 
 @Component({
   selector: 'app-sso',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './sso.component.html',
-  styleUrl: './sso.component.scss'
+  styleUrls: ['./sso.component.scss'],
+  // providers: [CookieService]
 })
-export class SsoComponent implements OnInit {
-  currentStatus = 0;
+export class SsoComponent implements OnInit, OnDestroy {
+  currentStatusIndex = 0;
   statusMessages = [
-    'Initiating secure connection...',
-    'Validating credentials...',
-    'Connecting to identity provider...',
-    'Finalizing authentication...'
+    '🔒 Initiating secure connection...',
+    '🔑 Validating credentials...',
+    '🔄 Connecting to identity provider...',
+    '⚡ Finalizing authentication...',
+    '➡️ Redirecting to dashboard...'
   ];
+
+  private statusSub?: Subscription;
 
   constructor(
     private readonly router: Router,
     private readonly route: ActivatedRoute,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
+    // private readonly cookieService: CookieService
   ) { }
 
   ngOnInit() {
-    this.cycleStatusMessages();
+    this.startStatusCycle();
     this.processSSO();
   }
 
-  private cycleStatusMessages() {
-    let index = 0;
-    setInterval(() => {
-      this.currentStatus = (index + 1) % this.statusMessages.length;
-      index = this.currentStatus;
-    }, 2500);
+  ngOnDestroy() {
+    this.statusSub?.unsubscribe();
+  }
+
+  private startStatusCycle() {
+    this.statusSub = interval(2000).subscribe(() => {
+      this.currentStatusIndex =
+        (this.currentStatusIndex + 1) % this.statusMessages.length;
+    });
   }
 
   private processSSO() {
     const queryParams = this.route.snapshot.queryParamMap;
-    const token = queryParams.get('token');
-    const refreshToken = queryParams.get('refreshtoken');
-    const redirect = queryParams.get('redirect') ?? sessionStorage.getItem('redirectUrl') ?? '/dashboard';
 
-    if (token && refreshToken) {
-      this.authService.isAuthenticated(token, refreshToken).subscribe(
-        isValid => {
-          if (isValid) {
-            this.authService.setToken(token, refreshToken);
-            sessionStorage.removeItem('redirectUrl');
-            setTimeout(() => {
-              this.router.navigateByUrl(redirect);
-            }, 5000);
-          } else {
-            this.tryRefreshTokenOrRedirect();
-          }
-        },
-        err => {
-          console.error('Token validation failed:', err);
-          this.tryRefreshTokenOrRedirect();
-        }
-      );
+    const accessToken = queryParams.get('accessToken');
+    const refreshToken = queryParams.get('refreshToken');
+    const userEmail = queryParams.get('userEmail');
+    const redirect =
+      queryParams.get('redirect') ?? sessionStorage.getItem('redirectUrl') ?? '/dashboard';
+
+    console.log('Received Query Params:', {
+      accessToken,
+      refreshToken,
+      userEmail,
+      redirect
+    });
+
+    if (accessToken && refreshToken && userEmail) {
+      this.storeSession(accessToken, refreshToken, userEmail);
+      this.validateAndRedirect(accessToken, refreshToken, userEmail, redirect);
     } else {
-      this.tryRefreshTokenOrRedirect();
+      console.warn('⚠️ Missing SSO params. Trying refresh token...');
+      this.tryRefreshTokenOrRedirect(redirect);
     }
   }
 
-  private tryRefreshTokenOrRedirect() {
-    const refreshToken = this.authService.getRefreshToken();
-    if (refreshToken) {
-      this.authService.generateTokenFromRefreshToken().subscribe(
-        (res) => {
-          if (res.data.downstreamResponse.microserviceResponse.data.token) {
-            this.authService.setToken(res.data.token, refreshToken);
-            const redirect = sessionStorage.getItem('redirectUrl') ?? '/dashboard';
-            sessionStorage.removeItem('redirectUrl');
-            setTimeout(() => {
-              this.router.navigateByUrl(redirect);
-            }, 5000);
-          } else {
-            this.handleRedirectToLogin();
-          }
-        },
-        err => {
-          console.error('Refresh token failed:', err);
+  /**
+   * Store tokens in multiple places: localStorage, sessionStorage, and cookies
+   */
+  private storeSession(accessToken: string, refreshToken: string, email: string) {
+    localStorage.setItem('access-token', accessToken);
+    localStorage.setItem('refresh-token', refreshToken);
+    localStorage.setItem('user-email', email);
+
+    sessionStorage.setItem('access-token', accessToken);
+    sessionStorage.setItem('refresh-token', refreshToken);
+    sessionStorage.setItem('user-email', email);
+
+    // this.cookieService.set('access-token', accessToken);
+    // this.cookieService.set('refresh-token', refreshToken);
+    // this.cookieService.set('user-email', email);
+  }
+
+  private validateAndRedirect(
+    accessToken: string,
+    refreshToken: string,
+    email: string,
+    redirect: string
+  ) {
+    this.authService.isAuthenticated(accessToken, refreshToken, email).subscribe({
+      next: (isValid) => {
+        if (isValid) {
+          console.log('✅ Token validated. Redirecting...');
+          setTimeout(() => this.router.navigateByUrl(redirect), 2500);
+        } else {
+          console.warn('❌ Token invalid. Trying refresh...');
+          this.tryRefreshTokenOrRedirect(redirect);
+        }
+      },
+      error: (err) => {
+        console.error('❌ Token validation failed:', err);
+        this.tryRefreshTokenOrRedirect(redirect);
+      }
+    });
+  }
+
+  private tryRefreshTokenOrRedirect(redirect: string) {
+    const refreshToken = this.authService.getRefreshToken() //|| this.cookieService.get('refresh-token'); 
+
+    if (!refreshToken) {
+      console.warn('❌ No refresh token found.');
+      this.handleRedirectToLogin();
+      return;
+    }
+
+    this.authService.generateTokenFromRefreshToken().subscribe({
+      next: (res: any) => {
+        const newAccessToken = res?.data?.downstreamResponse?.microserviceResponse?.data?.accessToken;
+        if (newAccessToken) {
+          console.log('✅ Token refreshed. Updating session...');
+          this.storeSession(newAccessToken, refreshToken, localStorage.getItem('user-email') || '');
+          setTimeout(() => this.router.navigateByUrl(redirect), 2500);
+        } else {
+          console.warn('❌ Refresh token response invalid.');
           this.handleRedirectToLogin();
         }
-      );
-    } else {
-      this.handleRedirectToLogin();
-    }
+      },
+      error: (err) => {
+        console.error('❌ Refresh token request failed:', err);
+        this.handleRedirectToLogin();
+      }
+    });
   }
 
   private handleRedirectToLogin() {
-    this.authService.clearToken();
+    console.log('Redirecting to login...');
+    localStorage.clear();
+    sessionStorage.clear();
+    //this.cookieService.deleteAll();
     this.router.navigate(['/login']);
   }
 }

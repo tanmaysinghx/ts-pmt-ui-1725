@@ -29,18 +29,11 @@
 
                     <!-- Status Messages -->
                     <div class="mt-6">
-                        <p class="text-sm text-gray-600 dark:text-gray-400" *ngIf="currentStatus === 0">
-                            🔒 Initiating secure connection...
-                        </p>
-                        <p class="text-sm text-gray-600 dark:text-gray-400" *ngIf="currentStatus === 1">
-                            🔑 Validating credentials...
-                        </p>
-                        <p class="text-sm text-gray-600 dark:text-gray-400" *ngIf="currentStatus === 2">
-                            🔄 Connecting to identity provider...
-                        </p>
-                        <p class="text-sm text-gray-600 dark:text-gray-400" *ngIf="currentStatus === 3">
-                            ⚡ Finalizing authentication...
-                        </p>
+                        <ng-container *ngFor="let message of statusMessages; let i = index">
+                            <p class="text-sm text-gray-600 dark:text-gray-400" *ngIf="currentStatusIndex === i">
+                                {{ message }}
+                            </p>
+                        </ng-container>
                     </div>
 
                     <!-- Footer Text -->

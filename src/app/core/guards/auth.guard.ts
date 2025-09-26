@@ -11,7 +11,7 @@ export class AuthGuard implements CanActivate {
         const token = this.authService.getAuthToken();
         const refreshToken = this.authService.getRefreshToken();
         if (token) {
-            return this.authService.validateToken(token).pipe(
+            return this.authService.validateToken(token, "tanmaysinhx99@gmail.com").pipe(
                 map(() => true),
                 catchError(() => {
                     return this.redirectToSSO(state.url);
