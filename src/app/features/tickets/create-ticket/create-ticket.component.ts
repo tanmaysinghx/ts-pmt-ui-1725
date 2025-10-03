@@ -1,17 +1,20 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DynamicFormComponent } from '../../../shared/components/dynamic-ui/dynamic-form/dynamic-form.component';
 import { CmsMapperService } from '../../../shared/components/dynamic-ui/cms-mapper.service';
 import { FieldConfig } from '../../../shared/components/dynamic-ui/field-config.model';
+import { SnackbarComponent } from '../../../shared/components/snackbar/snackbar.component';
 
 @Component({
   selector: 'app-create-ticket',
-  imports: [CommonModule, FormsModule, DynamicFormComponent],
+  imports: [CommonModule, FormsModule, DynamicFormComponent, SnackbarComponent],
   templateUrl: './create-ticket.component.html',
   styleUrl: './create-ticket.component.scss'
 })
 export class CreateTicketComponent implements OnInit {
+  @ViewChild(SnackbarComponent) snackbar!: SnackbarComponent;
+
   ticketFormConfig: FieldConfig[] = [];
   ticketData: any = {};
   buttons = [
@@ -104,4 +107,53 @@ export class CreateTicketComponent implements OnInit {
       alert('Saved draft!');
     }
   }
+
+  showCustomSnackbar() {
+    this.snackbar.show(
+      'Ticket Created!',
+      'Your ticket has been successfully created.',
+      'success', // variant
+      5000,      // duration in ms
+      'type1'    // type (style)
+    );
+  }
+
+  showErrorSnackbar() {
+    this.snackbar.show(
+      'Error!',
+      'Failed to create ticket.',
+      'error',
+      4000,
+      'type1'
+    );
+  }
+
+  // Type1 example
+  showSuccess() {
+    this.snackbar.show(
+      'Ticket Created!',
+      'Your ticket has been successfully created.',
+      'info', // variant
+      5000,      // duration
+      'type1'    // type
+    );
+  }
+
+  // Type2 example
+  showErrorList() {
+    this.snackbar.show(
+      'Validation errors occurred:',
+      '',
+      'error',
+      7000,
+      'type2',
+      [
+        "Username is already in use",
+        "Email field can't be empty",
+        "Please enter a valid phone number"
+      ]
+    );
+  }
+
+
 }

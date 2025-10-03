@@ -10,3 +10,8 @@
   (formSubmit)="onFormSubmit($event)"
   (buttonClick)="onButtonClick($event)">
 </app-dynamic-form>
+
+<app-snackbar></app-snackbar>
+<button (click)="showSuccess()">Show Success</button>
+<button (click)="showErrorSnackbar()">Show Error</button>
+<button (click)="showErrorList()">Show List Error</button>

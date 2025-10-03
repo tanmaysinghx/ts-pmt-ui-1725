@@ -1,0 +1,79 @@
+<!-- Type1 (Single message) -->
+<div *ngIf="visible && type==='type1'" class="fixed top-5 right-5 w-96 z-50">
+    <div [ngClass]="{
+      'bg-teal-50 border-t-2 border-teal-500 dark:bg-teal-800/30': variant === 'success',
+      'bg-red-50 border-s-4 border-red-500 dark:bg-red-800/30': variant === 'error',
+      'bg-yellow-50 border-s-4 border-yellow-500 dark:bg-yellow-800/30': variant === 'warning',
+      'bg-blue-50 border-s-4 border-blue-500 dark:bg-blue-800/30': variant === 'info'
+    }" class="rounded-lg p-4 shadow flex items-start gap-3" role="alert" tabindex="-1">
+        <div class="shrink-0">
+            <!-- 🔹 You can place variant-specific icons here -->
+        </div>
+        <div>
+            <h3 class="text-gray-800 font-semibold dark:text-white">{{ message }}</h3>
+            <p class="text-sm text-gray-700 dark:text-neutral-400">{{ description }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- Type2 (List messages) -->
+<div *ngIf="visible && type==='type2'" class="fixed top-5 right-5 w-96 z-50">
+    <div [ngClass]="{
+      'bg-teal-50 border border-teal-200 text-teal-800 dark:bg-teal-800/10 dark:border-teal-900 dark:text-teal-400': variant === 'success',
+      'bg-red-50 border border-red-200 text-red-800 dark:bg-red-800/10 dark:border-red-900 dark:text-red-500': variant === 'error',
+      'bg-yellow-50 border border-yellow-200 text-yellow-800 dark:bg-yellow-800/10 dark:border-yellow-900 dark:text-yellow-500': variant === 'warning',
+      'bg-blue-50 border border-blue-200 text-blue-800 dark:bg-blue-800/10 dark:border-blue-900 dark:text-blue-500': variant === 'info'
+    }" class="text-sm rounded-lg p-4" role="alert" tabindex="-1" aria-labelledby="hs-with-list-label">
+        <div class="flex">
+            <div class="shrink-0">
+                <!-- Variant-specific icons -->
+                <svg *ngIf="variant==='error'" class="shrink-0 size-4 mt-0.5" xmlns="http://www.w3.org/2000/svg"
+                    width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="m15 9-6 6"></path>
+                    <path d="m9 9 6 6"></path>
+                </svg>
+
+                <svg *ngIf="variant==='success'" class="shrink-0 size-4 mt-0.5" xmlns="http://www.w3.org/2000/svg"
+                    width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="m9 12 2 2 4-4"></path>
+                </svg>
+
+                <svg *ngIf="variant==='warning'" class="shrink-0 size-4 mt-0.5" xmlns="http://www.w3.org/2000/svg"
+                    width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12" y2="16"></line>
+                </svg>
+
+                <svg *ngIf="variant==='info'" class="shrink-0 size-4 mt-0.5" xmlns="http://www.w3.org/2000/svg"
+                    width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12" y2="16"></line>
+                </svg>
+            </div>
+
+            <div class="ms-4">
+                <h3 id="hs-with-list-label" class="text-sm font-semibold">
+                    {{ message }}
+                </h3>
+                <div class="mt-2 text-sm" [ngClass]="{
+            'text-red-700 dark:text-red-400': variant==='error',
+            'text-teal-700 dark:text-teal-400': variant==='success',
+            'text-yellow-700 dark:text-yellow-400': variant==='warning',
+            'text-blue-700 dark:text-blue-400': variant==='info'
+          }">
+                    <ul class="list-disc space-y-1 ps-5">
+                        <li *ngFor="let item of list">{{ item }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
