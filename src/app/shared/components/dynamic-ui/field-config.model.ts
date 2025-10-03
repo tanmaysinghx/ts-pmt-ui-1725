@@ -1,7 +1,7 @@
 export interface FieldConfig {
     key: string;
     label: string;
-    type: 'text' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'date' | 'file' | 'api-search';
+    type: 'text' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'date' | 'file' | 'api-search' | 'tags';
     placeholder?: string;
     required?: boolean;
     readonly?: boolean;

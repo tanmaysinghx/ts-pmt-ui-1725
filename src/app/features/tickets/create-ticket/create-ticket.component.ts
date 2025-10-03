@@ -26,7 +26,8 @@ export class CreateTicketComponent implements OnInit {
       { key: 'title', label: 'Title', type: 'text', placeholder: 'Enter ticket title', required: true },
       { key: 'description', label: 'Description', type: 'textarea', placeholder: 'Enter detailed description', required: true },
       {
-        key: 'status', label: 'Status', type: 'select', options: [
+        key: 'status', label: 'Status', type: 'select',
+        options: [
           { value: 'CREATED', label: 'Created' },
           { value: 'IN_PROGRESS', label: 'In Progress' },
           { value: 'RESOLVED', label: 'Resolved' },
@@ -35,7 +36,8 @@ export class CreateTicketComponent implements OnInit {
         defaultValue: 'CREATED'
       },
       {
-        key: 'priority', label: 'Priority', type: 'select', options: [
+        key: 'priority', label: 'Priority', type: 'select',
+        options: [
           { value: 'LOW', label: 'Low' },
           { value: 'MEDIUM', label: 'Medium' },
           { value: 'HIGH', label: 'High' },
@@ -46,7 +48,8 @@ export class CreateTicketComponent implements OnInit {
       { key: 'assignedToGroup', label: 'Assigned Group', type: 'text', placeholder: 'Enter group ID' },
       { key: 'assignedToTeam', label: 'Assigned Team', type: 'text', placeholder: 'Enter team ID' },
       {
-        key: 'assignedToUser', label: 'Assigned User', type: 'api-search', placeholder: 'Search user email', apiTrigger: {
+        key: 'assignedToUser', label: 'Assigned User', type: 'api-search', placeholder: 'Search user email',
+        apiTrigger: {
           minLength: 3,
           apiUrl: '/users/search',
           mapLabel: 'email',
@@ -54,7 +57,7 @@ export class CreateTicketComponent implements OnInit {
         }
       },
       { key: 'reportedBy', label: 'Reported By', type: 'text', readonly: true },
-      { key: 'tags', label: 'Tags', type: 'text', placeholder: 'Comma-separated tags' },
+      { key: 'tags', label: 'Tags', type: 'tags', placeholder: 'Add tags as chips' },
       { key: 'attachments', label: 'Attachments', type: 'file', placeholder: 'Upload files' },
       { key: 'dueDate', label: 'Due Date', type: 'date' },
       { key: 'comments', label: 'Comments', type: 'textarea', placeholder: 'Enter comments', readonly: true },
@@ -63,12 +66,22 @@ export class CreateTicketComponent implements OnInit {
 
     // Example API response (pre-filled data)
     const apiResp = {
-      title: '',
-      description: '',
-      category: 'Bug',
-      priority: 'Medium',
-      assignedTo: null,
-      dueDate: null
+      title: 'Unable to login to the system',
+      description: 'When trying to login, the system throws an unknown error after submitting credentials.',
+      status: 'CREATED',
+      priority: 'HIGH',
+      assignedToGroup: 'GID001',
+      assignedToTeam: 'TID001',
+      assignedToUser: '',
+      reportedBy: 'tanmaysinghx99@gmail.com',
+      tags: ['login', 'urgent', 'authentication'],
+      attachments: [
+        'https://example.com/screenshots/error1.png',
+        'https://example.com/screenshots/error2.png'
+      ],
+      dueDate: '2025-10-15',
+      comments: [],
+      lastUpdatedBy: 'tanmaysinghx99@gmail.com'
     };
 
     // Map CMS config + API data into usable form model

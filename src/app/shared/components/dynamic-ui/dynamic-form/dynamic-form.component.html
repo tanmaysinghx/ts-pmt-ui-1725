@@ -4,7 +4,7 @@
     <h1 class="text-2xl font-bold text-gray-800 mb-6">{{ title }}</h1>
 
     <form [formGroup]="form" class="space-y-6"
-          (ngSubmit)="handleButtonClick({key:'submit',label:'Submit',type:'submit'})">
+      (ngSubmit)="handleButtonClick({key:'submit',label:'Submit',type:'submit'})">
 
       <ng-container *ngFor="let field of cmsConfig">
 
@@ -15,95 +15,99 @@
         </label>
 
         <!-- Text / Date -->
-        <input *ngIf="['text','date'].includes(field.type)"
-               [type]="field.type"
-               class="block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm shadow-sm focus:ring-blue-500 focus:border-blue-500"
-               [placeholder]="field.placeholder"
-               [formControlName]="field.key"
-               [readonly]="field.readonly"
-               (input)="onInputChange(field, $event)" />
+        <input *ngIf="['text','date'].includes(field.type)" [type]="field.type"
+          class="block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          [placeholder]="field.placeholder" [formControlName]="field.key" [readonly]="field.readonly"
+          (input)="onInputChange(field, $event)" />
 
         <!-- Textarea -->
         <textarea *ngIf="field.type==='textarea'" rows="4"
-                  class="block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                  [placeholder]="field.placeholder"
-                  [formControlName]="field.key"
-                  [readonly]="field.readonly"></textarea>
+          class="block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          [placeholder]="field.placeholder" [formControlName]="field.key" [readonly]="field.readonly"></textarea>
 
         <!-- Select -->
         <select *ngIf="field.type==='select'"
-                class="block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                [formControlName]="field.key"
-                [disabled]="field.readonly ?? false">
+          class="block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          [formControlName]="field.key" [disabled]="field.readonly ?? false">
           <option *ngIf="field.placeholder" value="">{{ field.placeholder }}</option>
-          <option *ngFor="let opt of field.options" [value]="opt.value">
-            {{ opt.label }}
-          </option>
+          <option *ngFor="let opt of field.options" [value]="opt.value">{{ opt.label }}</option>
         </select>
 
         <!-- Radio -->
         <div *ngIf="field.type==='radio'" class="flex gap-4">
           <label *ngFor="let opt of field.options" class="inline-flex items-center">
-            <input type="radio"
-                   [value]="opt.value"
-                   [formControlName]="field.key"
-                   [disabled]="field.readonly ?? false"
-                   class="mr-2" />
+            <input type="radio" [value]="opt.value" [formControlName]="field.key" [disabled]="field.readonly ?? false"
+              class="mr-2" />
             {{ opt.label }}
           </label>
         </div>
 
         <!-- Checkbox -->
         <div *ngIf="field.type==='checkbox'" class="flex items-center">
-          <input type="checkbox"
-                 [formControlName]="field.key"
-                 [disabled]="field.readonly ?? false"
-                 class="mr-2" />
+          <input type="checkbox" [formControlName]="field.key" [disabled]="field.readonly ?? false" class="mr-2" />
           {{ field.label }}
         </div>
 
-        <!-- File -->
-        <input *ngIf="field.type==='file'" type="file"
-               [formControlName]="field.key"
-               [disabled]="field.readonly ?? false"
-               class="block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
-                      file:mr-4 file:py-2 file:px-3 file:rounded-lg file:border-0
-                      file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700
-                      hover:file:bg-blue-100">
+        <!-- File + Existing attachments -->
+        <div *ngIf="field.type==='file'">
+          <div class="flex flex-col gap-1 mb-2">
+            <div *ngFor="let file of attachmentsMap[field.key]"
+              class="flex items-center justify-between border rounded px-2 py-1">
+              <span class="truncate">{{file}}</span>
+              <div class="flex gap-2">
+                <a href="{{file}}" target="_blank" class="text-blue-600 hover:underline text-sm">View</a>
+                <a href="{{file}}" download class="text-green-600 hover:underline text-sm">Download</a>
+              </div>
+            </div>
+          </div>
+          <input *ngIf="!field.readonly" type="file" multiple (change)="handleFileChange(field, $event)" class="block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
+                   file:mr-4 file:py-2 file:px-3 file:rounded-lg file:border-0
+                   file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700
+                   hover:file:bg-blue-100">
+        </div>
 
         <!-- API Search -->
         <div *ngIf="field.type==='api-search'" class="relative">
-          <input type="text"
-                 class="block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm shadow-sm"
-                 [placeholder]="field.placeholder || 'Search...'"
-                 (input)="onInputChange(field, $event)"
-                 [readonly]="field.readonly" />
+          <input type="text" class="block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm shadow-sm"
+            [placeholder]="field.placeholder || 'Search...'" (input)="onInputChange(field, $event)"
+            [readonly]="field.readonly" />
           <ul *ngIf="apiOptions[field.key]?.length"
-              class="absolute z-10 w-full bg-white border rounded-md shadow mt-1 max-h-40 overflow-y-auto">
-            <li *ngFor="let opt of apiOptions[field.key]"
-                (click)="handleOptionSelect(field, opt)"
-                class="p-2 hover:bg-gray-100 cursor-pointer">
+            class="absolute z-10 w-full bg-white border rounded-md shadow mt-1 max-h-40 overflow-y-auto">
+            <li *ngFor="let opt of apiOptions[field.key]" (click)="handleOptionSelect(field, opt)"
+              class="p-2 hover:bg-gray-100 cursor-pointer">
               {{ opt.label }}
             </li>
           </ul>
         </div>
 
+        <!-- Tags / Chips -->
+        <div *ngIf="field.type==='tags'">
+          <div class="flex flex-wrap gap-2 mb-2">
+            <span *ngFor="let tag of tagsMap[field.key]"
+              class="bg-blue-100 text-blue-700 px-2 py-1 rounded-full flex items-center gap-1">
+              {{tag}}
+              <button type="button" *ngIf="!field.readonly" (click)="removeTag(field, tag)"
+                class="text-red-500 hover:text-red-700">&times;</button>
+            </span>
+          </div>
+          <input *ngIf="!field.readonly" type="text" placeholder="Add tag"
+            (keyup.enter)="onTagInputEnter(field, $event)"
+            class="block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
       </ng-container>
 
       <!-- Buttons -->
       <div class="flex gap-4">
-        <button *ngFor="let btn of buttons"
-                type="{{btn.type || 'button'}}"
-                (click)="handleButtonClick(btn)"
-                class="inline-flex items-center justify-center px-6 py-3 rounded-lg shadow transition"
-                [ngClass]="{
-                  'bg-blue-600 text-white hover:bg-blue-700': btn.style==='primary',
-                  'bg-gray-200 text-gray-800 hover:bg-gray-300': btn.style==='secondary',
-                  'bg-red-600 text-white hover:bg-red-700': btn.style==='danger'
-                }">
+        <button *ngFor="let btn of buttons" type="{{btn.type || 'button'}}" (click)="handleButtonClick(btn)"
+          class="inline-flex items-center justify-center px-6 py-3 rounded-lg shadow transition" [ngClass]="{
+            'bg-blue-600 text-white hover:bg-blue-700': btn.style==='primary',
+            'bg-gray-200 text-gray-800 hover:bg-gray-300': btn.style==='secondary',
+            'bg-red-600 text-white hover:bg-red-700': btn.style==='danger'
+          }">
           {{ btn.label }}
         </button>
       </div>
+
     </form>
   </div>
 </div>
