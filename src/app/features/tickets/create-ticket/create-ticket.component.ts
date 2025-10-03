@@ -133,7 +133,7 @@ export class CreateTicketComponent implements OnInit {
     this.snackbar.show(
       'Ticket Created!',
       'Your ticket has been successfully created.',
-      'info', // variant
+      'success', // variant
       5000,      // duration
       'type1'    // type
     );

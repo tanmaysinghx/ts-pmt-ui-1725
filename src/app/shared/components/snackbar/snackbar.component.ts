@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 
-export type SnackbarType = 'type1' | 'type2'; // added type2
+export type SnackbarType = 'type1' | 'type2';
 export type SnackbarVariant = 'success' | 'error' | 'warning' | 'info';
 
 @Component({
@@ -46,4 +46,5 @@ export class SnackbarComponent {
   hide() {
     this.visible = false;
   }
+
 }
