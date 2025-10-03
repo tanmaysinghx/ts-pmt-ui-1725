@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../services/sso.service';
-// import { CookieService } from 'ngx-cookie-service';
 import { Subscription, interval } from 'rxjs';
 
 @Component({
@@ -11,7 +10,6 @@ import { Subscription, interval } from 'rxjs';
   imports: [CommonModule],
   templateUrl: './sso.component.html',
   styleUrls: ['./sso.component.scss'],
-  // providers: [CookieService]
 })
 export class SsoComponent implements OnInit, OnDestroy {
   currentStatusIndex = 0;
@@ -29,7 +27,6 @@ export class SsoComponent implements OnInit, OnDestroy {
     private readonly router: Router,
     private readonly route: ActivatedRoute,
     private readonly authService: AuthService,
-    // private readonly cookieService: CookieService
   ) { }
 
   ngOnInit() {
@@ -50,12 +47,10 @@ export class SsoComponent implements OnInit, OnDestroy {
 
   private processSSO() {
     const queryParams = this.route.snapshot.queryParamMap;
-
     const accessToken = queryParams.get('accessToken');
     const refreshToken = queryParams.get('refreshToken');
     const userEmail = queryParams.get('userEmail');
-    const redirect =
-      queryParams.get('redirect') ?? sessionStorage.getItem('redirectUrl') ?? '/dashboard';
+    const redirect = queryParams.get('redirect') ?? sessionStorage.getItem('redirectUrl') ?? '/dashboard';
 
     console.log('Received Query Params:', {
       accessToken,
@@ -73,9 +68,6 @@ export class SsoComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Store tokens in multiple places: localStorage, sessionStorage, and cookies
-   */
   private storeSession(accessToken: string, refreshToken: string, email: string) {
     localStorage.setItem('access-token', accessToken);
     localStorage.setItem('refresh-token', refreshToken);
@@ -84,10 +76,6 @@ export class SsoComponent implements OnInit, OnDestroy {
     sessionStorage.setItem('access-token', accessToken);
     sessionStorage.setItem('refresh-token', refreshToken);
     sessionStorage.setItem('user-email', email);
-
-    // this.cookieService.set('access-token', accessToken);
-    // this.cookieService.set('refresh-token', refreshToken);
-    // this.cookieService.set('user-email', email);
   }
 
   private validateAndRedirect(
@@ -114,7 +102,7 @@ export class SsoComponent implements OnInit, OnDestroy {
   }
 
   private tryRefreshTokenOrRedirect(redirect: string) {
-    const refreshToken = this.authService.getRefreshToken() //|| this.cookieService.get('refresh-token'); 
+    const refreshToken = this.authService.getRefreshToken()
 
     if (!refreshToken) {
       console.warn('❌ No refresh token found.');
@@ -145,7 +133,6 @@ export class SsoComponent implements OnInit, OnDestroy {
     console.log('Redirecting to login...');
     localStorage.clear();
     sessionStorage.clear();
-    //this.cookieService.deleteAll();
     this.router.navigate(['/login']);
   }
 }
