@@ -69,8 +69,8 @@ export class CreateTicketComponent implements OnInit {
 
     // Example API response (pre-filled data)
     const apiResp = {
-      title: 'Unable to login to the system',
-      description: 'When trying to login, the system throws an unknown error after submitting credentials.',
+      title: '',
+      description: '',
       status: 'CREATED',
       priority: 'HIGH',
       assignedToGroup: 'GID001',

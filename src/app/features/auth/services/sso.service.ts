@@ -62,7 +62,7 @@ export class AuthService {
 
   /** Validate token endpoint */
   validateToken(accessToken: string, userEmail: string): Observable<any> {
-    const url = `${environment.apiGatewayService}/1625/v2/api/auth/verify/verify-token?workflowCode=16250005&region=docker&apiVersion=v1&method=POST`;
+    const url = `${environment.apiGatewayService}/trigger-workflow/WF1625E20004?apiEndpoint=/v2/api/auth/verify/verify-token`;
     const body = { token: accessToken, email: userEmail }; // ✅ email included
     console.log('Validating token:', body);
     return this.http.post(url, body).pipe(
@@ -85,7 +85,7 @@ export class AuthService {
       return throwError(() => new Error('No user email available'));
     }
 
-    const url = `${environment.apiGatewayService}/1625/v2/api/auth/refresh-token?workflowCode=16250004&region=docker&apiVersion=v1&method=POST`;
+    const url = `${environment.apiGatewayService}/trigger-workflow/WF1625E20005?apiEndpoint=/v2/api/auth/refresh-token''`;
     const body = { refreshToken, email }; // ✅ include email here
     console.log('Refreshing token with body:', body);
 

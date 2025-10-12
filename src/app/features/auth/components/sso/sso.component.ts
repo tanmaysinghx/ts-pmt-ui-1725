@@ -112,7 +112,7 @@ export class SsoComponent implements OnInit, OnDestroy {
 
     this.authService.generateTokenFromRefreshToken().subscribe({
       next: (res: any) => {
-        const newAccessToken = res?.data?.downstreamResponse?.microserviceResponse?.data?.accessToken;
+        const newAccessToken = res?.data?.downstreamResponse?.data?.accessToken;
         if (newAccessToken) {
           console.log('✅ Token refreshed. Updating session...');
           this.storeSession(newAccessToken, refreshToken, localStorage.getItem('user-email') || '');
