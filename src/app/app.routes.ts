@@ -5,11 +5,11 @@ import { LayoutUserComponent } from './layouts/layout-user/layout-user.component
 import { LayoutPreloginComponent } from './layouts/layout-prelogin/layout-prelogin.component';
 import { AuthGuard } from './core/guards/auth.guard';
 import { DashboardUserComponent } from './features/dashboard/components/dashboard-user/dashboard-user.component';
-import { CreateTicketComponent } from './features/tickets/create-ticket/create-ticket.component';
-import { ViewTicketsComponent } from './features/tickets/view-tickets/view-tickets.component';
-import { SearchTicketsComponent } from './features/tickets/search-tickets/search-tickets.component';
-import { TicketDescriptionComponent } from './features/tickets/ticket-description/ticket-description.component';
-import { AssignedTicketsComponent } from './features/tickets/assigned-tickets/assigned-tickets.component';
+import { CreateTicketComponent } from './features/tickets/components/create-ticket/create-ticket.component';
+import { ViewTicketsComponent } from './features/tickets/components/view-tickets/view-tickets.component';
+import { SearchTicketsComponent } from './features/tickets/components/search-tickets/search-tickets.component';
+import { TicketDescriptionComponent } from './features/tickets/components/ticket-description/ticket-description.component';
+import { AssignedTicketsComponent } from './features/tickets/components/assigned-tickets/assigned-tickets.component';
 import { ViewProfileComponent } from './features/profile/view-profile/view-profile.component';
 
 export const routes: Routes = [

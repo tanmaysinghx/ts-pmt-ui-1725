@@ -4,7 +4,7 @@
 
 export const environment = {
     production: false,
-    cmsUrl: 'http://localhost:4200/',
+    cmsUrl: 'http://localhost:1725/',
     ssoService: 'http://localhost:1605/1625/auth-service/v2/api',
     umtService: 'http://localhost:1605/1689/notification-service',
     apiGatewayService: 'http://localhost:1606/api/v1/api-engine',
