@@ -3,7 +3,7 @@
     <!-- Title -->
     <h1 class="text-2xl font-semibold text-gray-800 mb-6">{{ title }}</h1>
 
-    <form [formGroup]="form" (ngSubmit)="handleButtonClick({key:'submit',label:'Submit',type:'submit'})"
+    <form [formGroup]="form"
       class="w-full grid gap-6 grid-cols-12">
 
       <ng-container *ngFor="let field of cmsConfig">

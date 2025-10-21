@@ -103,7 +103,7 @@ export class DynamicFormComponent implements OnInit {
         if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
       }
-      this.formSubmit.emit(this.form.value);
+      this.formSubmit.emit(this.form.getRawValue());
     } else {
       this.buttonClick.emit({ key: btn.key, value: this.form.value });
     }
