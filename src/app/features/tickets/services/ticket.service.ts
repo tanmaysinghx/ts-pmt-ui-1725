@@ -19,4 +19,9 @@ export class TicketService {
     const apiUrl: string = environment.apiGatewayService + '/trigger-workflow/WF1674E20001?apiEndpoint=/api/v1/tickets/create-ticket';
     return this.http.post<any>(apiUrl, payload);
   }
+
+  getCMSDataViewTickets(): Observable<any> {
+    let dataUrl: string = environment.cmsUrl + 'assets/data/view-ticket-data.json';
+    return this.http.get<any>(dataUrl);
+  }
 }
