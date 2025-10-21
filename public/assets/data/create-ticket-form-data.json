@@ -5,7 +5,12 @@
             "label": "Title",
             "type": "text",
             "placeholder": "Enter ticket title",
-            "required": true
+            "required": true,
+            "validations": {
+                "minLength": 5,
+                "maxLength": 50,
+                "pattern": "^[A-Za-z0-9 ]+$"
+            }
         },
         {
             "key": "description",
@@ -127,22 +132,15 @@
         "title": "",
         "description": "",
         "status": "CREATED",
-        "priority": "HIGH",
-        "assignedToGroup": "GID001",
-        "assignedToTeam": "TID001",
+        "priority": "MEDIUM",
+        "assignedToGroup": "",
+        "assignedToTeam": "",
         "assignedToUser": "",
         "reportedBy": "tanmaysinghx99@gmail.com",
-        "tags": [
-            "login",
-            "urgent",
-            "authentication"
-        ],
-        "attachments": [
-            "https://example.com/screenshots/error1.png",
-            "https://example.com/screenshots/error2.png"
-        ],
-        "dueDate": "2025-10-15",
+        "tags": [],
+        "attachments": [],
+        "dueDate": "",
         "comments": [],
-        "lastUpdatedBy": "tanmaysinghx99@gmail.com"
+        "lastUpdatedBy": ""
     }
 }

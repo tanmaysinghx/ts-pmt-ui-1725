@@ -1,7 +1,7 @@
 export interface FieldConfig {
     key: string;
     label: string;
-    type: 'text' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'date' | 'file' | 'api-search' | 'tags';
+    type: 'select' | 'textarea' | 'text' | 'date' | 'radio' | 'checkbox' | 'file' | 'api-search' | 'tags' | 'color';
     placeholder?: string;
     required?: boolean;
     readonly?: boolean;
@@ -19,6 +19,7 @@ export interface FieldConfig {
 export interface ButtonConfig {
     key: string;
     label: string;
-    style?: 'primary' | 'secondary' | 'danger';
-    type?: 'submit' | 'button';
+    type?: 'button' | 'submit' | 'reset';
+    style?: 'primary' | 'secondary' | 'danger' | 'success';
 }
+
