@@ -10,14 +10,16 @@
                 "minLength": 5,
                 "maxLength": 50,
                 "pattern": "^[A-Za-z0-9 ]+$"
-            }
+            },
+            "cols": 12
         },
         {
             "key": "description",
             "label": "Description",
             "type": "textarea",
             "placeholder": "Enter detailed description",
-            "required": true
+            "required": true,
+            "cols": 12
         },
         {
             "key": "status",
@@ -41,7 +43,8 @@
                     "label": "On Hold"
                 }
             ],
-            "defaultValue": "CREATED"
+            "defaultValue": "CREATED",
+            "cols": 6
         },
         {
             "key": "priority",
@@ -65,19 +68,34 @@
                     "label": "Critical"
                 }
             ],
-            "defaultValue": "HIGH"
+            "defaultValue": "HIGH",
+            "cols": 6
         },
         {
             "key": "assignedToGroup",
             "label": "Assigned Group",
-            "type": "text",
-            "placeholder": "Enter group ID"
+            "type": "api-search",
+            "placeholder": "Enter group ID",
+            "apiTrigger": {
+                "minLength": 3,
+                "apiUrl": "/assets/data/assignedToGroup.json",
+                "mapLabel": "email",
+                "mapValue": "id"
+            },
+            "cols": 4
         },
         {
             "key": "assignedToTeam",
             "label": "Assigned Team",
-            "type": "text",
-            "placeholder": "Enter team ID"
+            "type": "api-search",
+            "placeholder": "Enter team ID",
+            "apiTrigger": {
+                "minLength": 3,
+                "apiUrl": "/assets/data/assignedToTeam.json",
+                "mapLabel": "email",
+                "mapValue": "id"
+            },
+            "cols": 4
         },
         {
             "key": "assignedToUser",
@@ -86,46 +104,52 @@
             "placeholder": "Search user email",
             "apiTrigger": {
                 "minLength": 3,
-                "apiUrl": "/users/search",
+                "apiUrl": "/assets/data/assignedToUser.json",
                 "mapLabel": "email",
                 "mapValue": "id"
-            }
-        },
-        {
-            "key": "reportedBy",
-            "label": "Reported By",
-            "type": "text",
-            "readonly": true
+            },
+            "cols": 4
         },
         {
             "key": "tags",
             "label": "Tags",
             "type": "tags",
-            "placeholder": "Add tags as chips"
+            "placeholder": "Add tags as chips",
+            "cols": 12
         },
         {
             "key": "attachments",
             "label": "Attachments",
             "type": "file",
-            "placeholder": "Upload files"
+            "placeholder": "Upload files",
+            "cols": 12
+        },
+        {
+            "key": "reportedBy",
+            "label": "Reported By",
+            "type": "text",
+            "readonly": true,
+            "cols": 6
         },
         {
             "key": "dueDate",
             "label": "Due Date",
-            "type": "date"
+            "type": "date",
+            "cols": 6
         },
         {
             "key": "comments",
             "label": "Comments",
             "type": "textarea",
             "placeholder": "Enter comments",
-            "readonly": true
+            "cols": 12
         },
         {
             "key": "lastUpdatedBy",
             "label": "Last Updated By",
             "type": "text",
-            "readonly": true
+            "readonly": true,
+            "cols": 12
         }
     ],
     "prefillData": {
@@ -141,6 +165,6 @@
         "attachments": [],
         "dueDate": "",
         "comments": [],
-        "lastUpdatedBy": ""
+        "lastUpdatedBy": "tanmaysinghx99@gmail.com"
     }
 }

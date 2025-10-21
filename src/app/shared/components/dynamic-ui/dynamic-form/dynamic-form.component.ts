@@ -20,10 +20,11 @@ export class DynamicFormComponent implements OnInit {
   @Output() buttonClick = new EventEmitter<{ key: string, value: any }>();
 
   form!: FormGroup;
-  apiOptions: Record<string, any[]> = {};
   tagsMap: Record<string, string[]> = {};
   attachmentsMap: Record<string, string[]> = {};
-  loadingFields: Record<string, boolean> = {};
+  apiSearchInput: { [key: string]: string } = {};
+  apiOptions: { [key: string]: any[] } = {};
+  loadingFields: { [key: string]: boolean } = {};
 
   constructor(private readonly fb: FormBuilder, private readonly http: HttpClient) { }
 
@@ -149,8 +150,6 @@ export class DynamicFormComponent implements OnInit {
     Array.from(files).forEach((file) => {
       this.attachmentsMap[field.key].push(file.name);
       this.uploadProgress[field.key] = 0;
-
-      // Simulate file upload progress (replace with real HTTP upload if needed)
       const interval = setInterval(() => {
         if (this.uploadProgress[field.key] >= 100) {
           clearInterval(interval);
@@ -195,5 +194,57 @@ export class DynamicFormComponent implements OnInit {
     }
   }
 
+  getFieldGridClass(field: FieldConfig): string {
+    const cols = field.cols || 12;
+    // Full width on mobile, responsive on sm and up
+    return `col-span-${cols} sm:col-span-${cols} w-full`;
+  }
+
+  // Get current display value for input
+  getApiInputValue(field: FieldConfig): string {
+    const control = this.form.get(field.key);
+    if (!control) return '';
+    const option = this.apiOptions[field.key]?.find(opt => opt.value === control.value);
+    return option ? option.label : control.value || '';
+  }
+
+  // Called on typing
+  onApiSearchInput(field: FieldConfig, value: string) {
+    const control = this.form.get(field.key);
+    if (control) {
+      control.setValue(value);
+    }
+
+    if (value.length >= (field.apiTrigger?.minLength ?? 0)) {
+      this.loadingFields[field.key] = true;
+
+      const apiUrl = field.apiTrigger?.apiUrl ?? '';
+      const mapLabel = field.apiTrigger?.mapLabel ?? 'label';
+      const mapValue = field.apiTrigger?.mapValue ?? 'value';
+
+      fetch(apiUrl)
+        .then(res => res.json())
+        .then((data: any[]) => {
+          this.apiOptions[field.key] = data.map(item => ({
+            label: item[mapLabel],
+            value: item[mapValue]
+          }));
+          this.loadingFields[field.key] = false;
+        })
+        .catch(() => this.loadingFields[field.key] = false);
+    } else {
+      this.apiOptions[field.key] = [];
+    }
+  }
+
+  // Called on selecting an option
+  handleApiOptionSelect(field: FieldConfig, option: any) {
+    const control = this.form.get(field.key);
+    console.log('Selected option:', option);
+    if (control) {
+      control.setValue(option.label);
+    }
+    this.apiOptions[field.key] = [];
+  }
 
 }

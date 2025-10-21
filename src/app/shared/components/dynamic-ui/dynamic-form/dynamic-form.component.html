@@ -4,178 +4,174 @@
     <h1 class="text-2xl font-semibold text-gray-800 mb-6">{{ title }}</h1>
 
     <form [formGroup]="form" (ngSubmit)="handleButtonClick({key:'submit',label:'Submit',type:'submit'})"
-      class="space-y-7">
+      class="w-full grid gap-6 grid-cols-12">
 
       <ng-container *ngFor="let field of cmsConfig">
-
-        <!-- Label + Tooltip -->
-        <label class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-          {{ field.label }}
-          <span *ngIf="field.tooltip" class="text-gray-400 cursor-pointer" [title]="field.tooltip">ℹ️</span>
-        </label>
-
-        <!-- Text / Number / Email / Password / Date -->
-        <input *ngIf="['text','number','email','password','date'].includes(field.type)" [type]="field.type"
-          [placeholder]="field.placeholder" [formControlName]="field.key" [readonly]="!!field.readonly"
-          (input)="onInputChange(field, $event)" class="block w-full border rounded-lg px-3 py-2 text-sm shadow-sm focus:ring-2 focus:outline-none border-gray-300 focus:ring-blue-500 focus:border-blue-500 transition duration-200  placeholder-gray-400
-                 [class.border-red-500]='getFieldError(field.key)'" />
-
-        <!-- Textarea -->
-        <textarea *ngIf="field.type==='textarea'" rows="4" [formControlName]="field.key" [readonly]="!!field.readonly"
-          [placeholder]="field.placeholder" class="block w-full border rounded-lg px-3 py-2 text-sm shadow-sm focus:ring-2 focus:outline-none border-gray-300 focus:ring-blue-500 focus:border-blue-500 transition duration-200 placeholder-gray-400
-                 [class.border-red-500]='getFieldError(field.key)'"></textarea>
-
-        <!-- Select -->
-        <select *ngIf="field.type==='select'" [formControlName]="field.key" [disabled]="!!field.readonly"
-          class="block w-full border rounded-lg px-3 py-2 text-sm shadow-sm focus:ring-2 focus:outline-none border-gray-300 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
-          <option *ngIf="field.placeholder" value="">{{ field.placeholder }}</option>
-          <option *ngFor="let opt of field.options" [value]="opt.value">{{ opt.label }}</option>
-        </select>
-
-        <!-- Checkbox -->
-        <div *ngIf="field.type==='checkbox'" class="flex items-center gap-2">
-          <input type="checkbox" [formControlName]="field.key" [disabled]="!!field.readonly"
-            class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-          <span>{{ field.label }}</span>
-        </div>
-
-        <!-- Radio -->
-        <div *ngIf="field.type==='radio'" class="flex gap-4 flex-wrap">
-          <label *ngFor="let opt of field.options" class="inline-flex items-center gap-1">
-            <input type="radio" [value]="opt.value" [formControlName]="field.key" [disabled]="!!field.readonly"
-              class="text-blue-600 focus:ring-blue-500" />
-            <span>{{ opt.label }}</span>
+        <div [ngClass]="getFieldGridClass(field)">
+          <!-- Label + Tooltip -->
+          <label class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+            {{ field.label }}
+            <span *ngIf="field.tooltip" class="text-gray-400 cursor-pointer" [title]="field.tooltip">ℹ️</span>
           </label>
-        </div>
 
-        <!-- Color Picker -->
-        <input *ngIf="field.type==='color'" type="color" [formControlName]="field.key"
-          class="w-16 h-10 border rounded cursor-pointer" />
+          <!-- Input wrapper for full width -->
+          <div class="w-full">
+            <!-- Text / Number / Email / Password / Date -->
+            <input *ngIf="['text','number','email','password','date'].includes(field.type)" [type]="field.type"
+              [placeholder]="field.placeholder" [formControlName]="field.key" [readonly]="!!field.readonly"
+              (input)="onInputChange(field, $event)"
+              class="block w-full border rounded-lg px-3 py-2 text-sm shadow-sm focus:ring-2 focus:outline-none border-gray-300 focus:ring-blue-500 focus:border-blue-500 transition duration-200 placeholder-gray-400"
+              [class.border-red-500]="getFieldError(field.key)" />
 
-        <!-- File Upload with Progress -->
-        <div *ngIf="field.type==='file'" class="space-y-2">
-          <!-- Existing uploaded files -->
-          <div *ngFor="let file of attachmentsMap[field.key]"
-            class="border border-gray-200 rounded-lg p-3 bg-gray-50 flex justify-between items-center shadow-sm">
-            <div class="flex items-center gap-3">
-              <!-- File Icon -->
-              <span
-                class="size-8 flex justify-center items-center border border-gray-200 text-gray-500 rounded-lg bg-white">
+            <!-- Textarea -->
+            <textarea *ngIf="field.type==='textarea'" rows="4" [formControlName]="field.key"
+              [readonly]="!!field.readonly" [placeholder]="field.placeholder"
+              class="block w-full border rounded-lg px-3 py-2 text-sm shadow-sm focus:ring-2 focus:outline-none border-gray-300 focus:ring-blue-500 focus:border-blue-500 transition duration-200 placeholder-gray-400"
+              [class.border-red-500]="getFieldError(field.key)">
+            </textarea>
 
-                <!-- Dynamic SVG based on file type -->
-                <ng-container [ngSwitch]="getFileIcon(file)">
+            <!-- Select -->
+            <select *ngIf="field.type==='select'" [formControlName]="field.key" [disabled]="!!field.readonly"
+              class="block w-full border rounded-lg px-3 py-2 text-sm shadow-sm focus:ring-2 focus:outline-none border-gray-300 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+              <option *ngIf="field.placeholder" value="">{{ field.placeholder }}</option>
+              <option *ngFor="let opt of field.options" [value]="opt.value">{{ opt.label }}</option>
+            </select>
 
-                  <!-- PDF -->
-                  <svg *ngSwitchCase="'pdf'" class="size-5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
-                    <path
-                      d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zM14 3.5V8h4.5L14 3.5zM8 13h2a1 1 0 0 1 0 2H8v-2zm0 3h2a1 1 0 1 1 0 2H8v-2zm3-6h2a1 1 0 1 1 0 2h-2v-2z" />
-                  </svg>
-                  <!-- Excel -->
-                  <svg *ngSwitchCase="'excel'" class="size-5 text-green-600" fill="currentColor" viewBox="0 0 24 24">
-                    <path
-                      d="M16 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a1 1 0 0 0 1-1V6zM10 14l-1.5 3h-1l2-4-2-4h1L10 10l1.5-3h1L10.5 11l2 4h-1L10 14z" />
-                  </svg>
-                  <!-- Word -->
-                  <svg *ngSwitchCase="'word'" class="size-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-                    <path
-                      d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h8l6-6V4a2 2 0 0 0-2-2zM9.5 15h-1L7 9h1l1.5 5 1.5-5h1L9.5 15z" />
-                  </svg>
-                  <!-- Image -->
-                  <svg *ngSwitchCase="'image'" class="size-5 text-purple-500" fill="currentColor" viewBox="0 0 24 24">
-                    <path
-                      d="M21 19V5a2 2 0 0 0-2-2H5C3.89 3 3 3.9 3 5v14c0 1.1.89 2 2 2h14a2 2 0 0 0 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
-                  </svg>
-                  <!-- Text -->
-                  <svg *ngSwitchCase="'text'" class="size-5 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
-                    <path
-                      d="M6 2a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12l4-4V4a2 2 0 0 0-2-2H6zm5 14H8v-2h3v2zm5-4H8v-2h8v2zm0-4H8V6h8v2z" />
-                  </svg>
-                  <!-- Zip -->
-                  <svg *ngSwitchCase="'zip'" class="size-5 text-yellow-600" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16h16V8zM10 14h4v2h-4zm0-4h4v2h-4zm0-4h2v2h-2z" />
-                  </svg>
-                  <!-- Default -->
-                  <svg *ngSwitchDefault class="size-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16h16V8zM8 14h8v2H8zm0-4h8v2H8z" />
-                  </svg>
+            <!-- Checkbox -->
+            <div *ngIf="field.type==='checkbox'" class="flex items-center gap-2">
+              <input type="checkbox" [formControlName]="field.key" [disabled]="!!field.readonly"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+              <span>{{ field.label }}</span>
+            </div>
 
-                </ng-container>
-              </span>
+            <!-- Radio -->
+            <div *ngIf="field.type==='radio'" class="flex gap-4 flex-wrap">
+              <label *ngFor="let opt of field.options" class="inline-flex items-center gap-1">
+                <input type="radio" [value]="opt.value" [formControlName]="field.key" [disabled]="!!field.readonly"
+                  class="text-blue-600 focus:ring-blue-500" />
+                <span>{{ opt.label }}</span>
+              </label>
+            </div>
 
-              <div>
-                <p class="text-sm font-medium text-gray-800">{{file}}</p>
-                <p class="text-xs text-gray-500">7 KB</p>
+            <!-- Color Picker -->
+            <input *ngIf="field.type==='color'" type="color" [formControlName]="field.key"
+              class="w-16 h-10 border rounded cursor-pointer" />
+
+            <!-- File Upload with Progress -->
+            <div *ngIf="field.type==='file'" class="space-y-2">
+              <div *ngFor="let file of attachmentsMap[field.key]"
+                class="border border-gray-200 rounded-lg p-3 bg-gray-50 flex justify-between items-center shadow-sm">
+                <div class="flex items-center gap-3">
+                  <span
+                    class="size-8 flex justify-center items-center border border-gray-200 text-gray-500 rounded-lg bg-white">
+                    <ng-container [ngSwitch]="getFileIcon(file)">
+                      <!-- PDF -->
+                      <svg *ngSwitchCase="'pdf'" class="size-5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                          d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zM14 3.5V8h4.5L14 3.5zM8 13h2a1 1 0 0 1 0 2H8v-2zm0 3h2a1 1 0 1 1 0 2H8v-2zm3-6h2a1 1 0 1 1 0 2h-2v-2z" />
+                      </svg>
+                      <!-- Excel -->
+                      <svg *ngSwitchCase="'excel'" class="size-5 text-green-600" fill="currentColor"
+                        viewBox="0 0 24 24">
+                        <path
+                          d="M16 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a1 1 0 0 0 1-1V6zM10 14l-1.5 3h-1l2-4-2-4h1L10 10l1.5-3h1L10.5 11l2 4h-1L10 14z" />
+                      </svg>
+                      <!-- Word -->
+                      <svg *ngSwitchCase="'word'" class="size-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                          d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h8l6-6V4a2 2 0 0 0-2-2zM9.5 15h-1L7 9h1l1.5 5 1.5-5h1L9.5 15z" />
+                      </svg>
+                      <!-- Image -->
+                      <svg *ngSwitchCase="'image'" class="size-5 text-purple-500" fill="currentColor"
+                        viewBox="0 0 24 24">
+                        <path
+                          d="M21 19V5a2 2 0 0 0-2-2H5C3.89 3 3 3.9 3 5v14c0 1.1.89 2 2 2h14a2 2 0 0 0 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
+                      </svg>
+                      <!-- Text -->
+                      <svg *ngSwitchCase="'text'" class="size-5 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                          d="M6 2a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12l4-4V4a2 2 0 0 0-2-2H6zm5 14H8v-2h3v2zm5-4H8v-2h8v2zm0-4H8V6h8v2z" />
+                      </svg>
+                      <!-- Default -->
+                      <svg *ngSwitchDefault class="size-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16h16V8zM8 14h8v2H8zm0-4h8v2H8z" />
+                      </svg>
+                    </ng-container>
+                  </span>
+                  <div>
+                    <p class="text-sm font-medium text-gray-800">{{file}}</p>
+                    <p class="text-xs text-gray-500">7 KB</p>
+                  </div>
+                </div>
+                <div class="inline-flex items-center gap-x-2">
+                  <a href="{{file}}" target="_blank" class="text-teal-600 hover:underline text-sm">View</a>
+                  <button type="button" (click)="removeAttachment(field, file)"
+                    class="text-gray-400 hover:text-red-500 focus:outline-none">
+                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                      stroke="currentColor" stroke-width="2">
+                      <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3-2h8a2 2 0 012 2v0M10 11v6M14 11v6" />
+                    </svg>
+                  </button>
+                </div>
               </div>
-            </div>
-            <div class="inline-flex items-center gap-x-2">
-              <a href="{{file}}" target="_blank" class="text-teal-600 hover:underline text-sm">View</a>
-              <button type="button" (click)="removeAttachment(field, file)"
-                class="text-gray-400 hover:text-red-500 focus:outline-none">
-                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor" stroke-width="2">
-                  <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3-2h8a2 2 0 012 2v0M10 11v6M14 11v6" />
-                </svg>
-              </button>
-            </div>
-          </div>
 
-          <!-- Progress Bar -->
-          <div *ngIf="uploadProgress[field.key] !== undefined" class="flex items-center gap-x-3 mt-2">
-            <div class="flex w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-              <div class="bg-teal-500 h-2 transition-all duration-500" [style.width.%]="uploadProgress[field.key]">
+              <!-- Progress Bar -->
+              <div *ngIf="uploadProgress[field.key] !== undefined" class="flex items-center gap-x-3 mt-2">
+                <div class="flex w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div class="bg-teal-500 h-2 transition-all duration-500" [style.width.%]="uploadProgress[field.key]">
+                  </div>
+                </div>
+                <div class="w-10 text-right text-sm text-gray-700">{{ uploadProgress[field.key] }}%</div>
               </div>
+
+              <!-- Upload Button -->
+              <input *ngIf="!field.readonly" type="file" multiple (change)="handleFileChange(field, $event)" class="block w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white
+                  file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0
+                  file:text-sm file:font-medium file:bg-teal-50 file:text-teal-700
+                  hover:file:bg-teal-100 focus:ring-1 focus:ring-teal-400 focus:border-teal-400" />
             </div>
-            <div class="w-10 text-right text-sm text-gray-700">
-              {{ uploadProgress[field.key] }}%
+
+            <!-- API Search -->
+            <div *ngIf="field.type==='api-search'" class="relative">
+              <input type="text" [placeholder]="field.placeholder || 'Search...'" [readonly]="!!field.readonly"
+                [value]="getApiInputValue(field)" (input)="onApiSearchInput(field, $any($event.target)?.value)" class="block w-full border rounded-lg px-3 py-2 text-sm shadow-sm focus:ring-2 focus:outline-none
+              border-gray-300 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400" />
+              <div *ngIf="loadingFields[field.key]" class="absolute right-3 top-2 text-gray-400 text-xs">Loading...
+              </div>
+              <ul *ngIf="apiOptions[field.key]?.length"
+                class="absolute z-10 w-full bg-white border rounded-md shadow mt-1 max-h-40 overflow-y-auto">
+                <li *ngFor="let opt of apiOptions[field.key]" (click)="handleApiOptionSelect(field, opt)"
+                  class="p-2 hover:bg-gray-100 cursor-pointer">
+                  {{ opt.label }}
+                </li>
+              </ul>
             </div>
+
+            <!-- Tags -->
+            <div *ngIf="field.type==='tags'">
+              <div class="flex flex-wrap gap-2 mb-2">
+                <span *ngFor="let tag of tagsMap[field.key]"
+                  class="bg-blue-100 text-blue-700 px-2 py-1 rounded-full flex items-center gap-1 text-sm">
+                  {{ tag }}
+                  <button *ngIf="!field.readonly" type="button" (click)="removeTag(field, tag)"
+                    class="text-red-500 hover:text-red-700">&times;</button>
+                </span>
+              </div>
+              <input *ngIf="!field.readonly" type="text" placeholder="Add tag"
+                (keyup.enter)="onTagInputEnter(field, $event)"
+                class="block w-full border rounded-lg px-3 py-2 text-sm shadow-sm focus:ring-2 focus:outline-none border-gray-300 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400" />
+            </div>
+
+            <!-- Validation Error -->
+            <p *ngIf="getFieldError(field.key)" class="text-xs text-red-500">{{ getFieldError(field.key) }}</p>
           </div>
-
-          <!-- Upload Button -->
-          <input *ngIf="!field.readonly" type="file" multiple (change)="handleFileChange(field, $event)" class="block w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white
-           file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0
-           file:text-sm file:font-medium file:bg-teal-50 file:text-teal-700
-           hover:file:bg-teal-100 focus:ring-1 focus:ring-teal-400 focus:border-teal-400" />
         </div>
-
-
-        <!-- API Search -->
-        <div *ngIf="field.type==='api-search'" class="relative">
-          <input type="text" [placeholder]="field.placeholder || 'Search...'" [readonly]="!!field.readonly"
-            (input)="onInputChange(field, $event)"
-            class="block w-full border rounded-lg px-3 py-2 text-sm shadow-sm focus:ring-2 focus:outline-none border-gray-300 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400" />
-          <div *ngIf="loadingFields[field.key]" class="absolute right-3 top-2 text-gray-400 text-xs">Loading...</div>
-          <ul *ngIf="apiOptions[field.key]?.length"
-            class="absolute z-10 w-full bg-white border rounded-md shadow mt-1 max-h-40 overflow-y-auto">
-            <li *ngFor="let opt of apiOptions[field.key]" (click)="handleOptionSelect(field, opt)"
-              class="p-2 hover:bg-gray-100 cursor-pointer">{{ opt.label }}</li>
-          </ul>
-        </div>
-
-        <!-- Tags -->
-        <div *ngIf="field.type==='tags'">
-          <div class="flex flex-wrap gap-2 mb-2">
-            <span *ngFor="let tag of tagsMap[field.key]"
-              class="bg-blue-100 text-blue-700 px-2 py-1 rounded-full flex items-center gap-1 text-sm">
-              {{ tag }}
-              <button *ngIf="!field.readonly" type="button" (click)="removeTag(field, tag)"
-                class="text-red-500 hover:text-red-700">&times;</button>
-            </span>
-          </div>
-          <input *ngIf="!field.readonly" type="text" placeholder="Add tag"
-            (keyup.enter)="onTagInputEnter(field, $event)"
-            class="block w-full border rounded-lg px-3 py-2 text-sm shadow-sm focus:ring-2 focus:outline-none border-gray-300 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400" />
-        </div>
-
-        <!-- Validation Error -->
-        <p *ngIf="getFieldError(field.key)" class="text-xs text-red-500">
-          {{ getFieldError(field.key) }}
-        </p>
       </ng-container>
 
       <!-- Buttons -->
-      <div class="flex flex-wrap gap-3 pt-4">
-        <button *ngFor="let btn of buttons" [type]="btn.type || 'button'" (click)="handleButtonClick(btn)" class="inline-flex items-center justify-center px-4 py-2.5 rounded-md text-sm font-medium shadow-sm transition-all duration-150
-                 focus:outline-none focus:ring-2 focus:outline-none border-gray-300 focus:ring-offset-2"
+      <div class="flex flex-wrap gap-3 pt-4 col-span-12">
+        <button *ngFor="let btn of buttons" [type]="btn.type || 'button'" (click)="handleButtonClick(btn)"
+          class="inline-flex items-center justify-center px-4 py-2.5 rounded-md text-sm font-medium shadow-sm transition-all duration-150 focus:outline-none focus:ring-2 focus:outline-none border-gray-300 focus:ring-offset-2"
           [disabled]="form.invalid && btn.type==='submit'" [ngClass]="{
             'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500': btn.style==='primary',
             'bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-400': btn.style==='secondary',

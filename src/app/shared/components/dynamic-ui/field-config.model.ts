@@ -14,6 +14,7 @@ export interface FieldConfig {
         mapLabel: string;
         mapValue: string;
     };
+    cols?: number;
 }
 
 export interface ButtonConfig {
