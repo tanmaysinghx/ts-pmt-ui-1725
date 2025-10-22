@@ -1,10 +1,11 @@
 <div class="px-4 py-10 mx-auto">
-    <!-- Outer Box -->
-    <div class="bg-white border border-gray-200 rounded-xl shadow-sm px-6 py-8">
-        <!-- Title -->
-        <h1 class="text-2xl font-bold text-gray-800 mb-6">View Tickets</h1>
-        <app-dynamic-table [data]="tickets" [columns]="tableColumns" [searchQuery]="searchQuery"
-            (rowClick)="onRowClick($event)">
-        </app-dynamic-table>
-    </div>
+  <div class="bg-white border border-gray-100 rounded-2xl shadow-md px-6 py-10">
+    <h1 class="text-2xl font-bold text-gray-800 mb-1 px-3">View Tickets</h1>
+    <app-dynamic-table
+      [data]="tickets"
+      [columns]="tableColumns"
+      [searchQuery]="searchQuery"
+      (rowClick)="onRowClick($event)"
+    ></app-dynamic-table>
+  </div>
 </div>

@@ -1,32 +1,37 @@
-<div class="px-2 py-2">
+<div class="px-3 py-6 mx-auto">
   <!-- Search & Filters -->
-  <div class="mb-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+  <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+    <!-- Search -->
     <input type="text" [(ngModel)]="searchQuery" placeholder="🔍 Search..."
-      class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 text-sm" />
+      class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder-gray-400 transition" />
 
+    <!-- Filters -->
     <ng-container *ngFor="let col of columns">
       <select *ngIf="col.type === 'badge'" [(ngModel)]="filters[col.key]"
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm text-sm focus:ring-blue-500">
+        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
         <option value="">Filter {{ col.label }}</option>
-        <option *ngFor="let val of objectKeys(col.badgeColors || {})" [value]="val">{{ val }}</option>
+        <option *ngFor="let val of objectKeys(col.badgeColors || {})" [value]="val">
+          {{ val }}
+        </option>
       </select>
     </ng-container>
   </div>
 
-  <!-- Table -->
-  <div class="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
-    <table class="min-w-full divide-y divide-gray-200 bg-white text-sm">
-      <thead class="bg-gray-50 text-left">
+  <!-- Table Container -->
+  <div class="overflow-x-auto bg-white border border-gray-200 rounded-2xl shadow-md">
+    <table class="min-w-full divide-y divide-gray-200 text-sm">
+      <thead class="bg-gray-50">
         <tr>
-          <th *ngFor="let col of columns" class="px-6 py-3 font-semibold text-gray-600">
+          <th *ngFor="let col of columns"
+            class="px-6 py-3 font-semibold text-gray-700 text-left uppercase text-xs tracking-wider">
             {{ col.label }}
           </th>
         </tr>
       </thead>
       <tbody class="divide-y divide-gray-100">
         <tr *ngFor="let row of filteredData()" (click)="onRowClick(row)"
-          class="cursor-pointer hover:bg-gray-50 transition">
-          <td *ngFor="let col of columns" class="px-6 py-4">
+          class="hover:bg-blue-50 transition cursor-pointer">
+          <td *ngFor="let col of columns" class="px-6 py-3">
             <ng-container [ngSwitch]="col.type">
               <!-- Badge -->
               <span *ngSwitchCase="'badge'" class="inline-block px-2 py-1 text-xs rounded-full font-medium"
@@ -35,7 +40,9 @@
               </span>
 
               <!-- Date -->
-              <span *ngSwitchCase="'date'">{{ row[col.key] | date: 'mediumDate' }}</span>
+              <span *ngSwitchCase="'date'" class="text-gray-600">
+                {{ row[col.key] | date: 'mediumDate' }}
+              </span>
 
               <!-- Custom Template -->
               <ng-container *ngSwitchCase="'custom'">
@@ -44,13 +51,14 @@
               </ng-container>
 
               <!-- Default -->
-              <span *ngSwitchDefault>{{ row[col.key] }}</span>
+              <span *ngSwitchDefault class="text-gray-800">{{ row[col.key] }}</span>
             </ng-container>
           </td>
         </tr>
       </tbody>
     </table>
 
+    <!-- Empty State -->
     <div *ngIf="filteredData().length === 0" class="p-8 text-center text-sm text-gray-500">
       No data found.
     </div>

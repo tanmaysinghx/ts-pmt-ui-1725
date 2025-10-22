@@ -1,0 +1,17 @@
+:host {
+    display: block;
+    font-family: 'Inter', sans-serif;
+}
+
+table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+th {
+    letter-spacing: 0.5px;
+}
+
+tr:hover td {
+    background-color: #f9fafb;
+}

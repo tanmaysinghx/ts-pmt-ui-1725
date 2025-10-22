@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DynamicTableComponent, TableColumn } from '../../../../shared/components/dynamic-ui/dynamic-table/dynamic-table.component';
@@ -12,7 +12,7 @@ import { TicketService } from '../../services/ticket.service';
   templateUrl: './view-tickets.component.html',
   styleUrl: './view-tickets.component.scss'
 })
-export class ViewTicketsComponent {
+export class ViewTicketsComponent implements OnInit {
   searchQuery: string = '';
   tableColumns: TableColumn[] = [];
   tickets: any[] = [];

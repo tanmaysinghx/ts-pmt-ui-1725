@@ -194,11 +194,25 @@ export class DynamicFormComponent implements OnInit {
     }
   }
 
+  // getFieldGridClass(field: FieldConfig): string {
+  //   const cols = field.cols || 12;
+  //   // Full width on mobile, responsive on sm and up
+  //   return `col-span-${cols} sm:col-span-${cols} w-full`;
+  // }
+
   getFieldGridClass(field: FieldConfig): string {
     const cols = field.cols || 12;
-    // Full width on mobile, responsive on sm and up
-    return `col-span-${cols} sm:col-span-${cols} w-full`;
+    const gridMap: Record<number, string> = {
+      1: 'col-span-1 sm:col-span-1',
+      2: 'col-span-2 sm:col-span-2',
+      3: 'col-span-3 sm:col-span-3',
+      4: 'col-span-4 sm:col-span-4',
+      6: 'col-span-6 sm:col-span-6',
+      12: 'col-span-12 sm:col-span-12'
+    };
+    return `${gridMap[cols] ?? 'col-span-12 sm:col-span-12'} w-full`;
   }
+
 
   // Get current display value for input
   getApiInputValue(field: FieldConfig): string {
