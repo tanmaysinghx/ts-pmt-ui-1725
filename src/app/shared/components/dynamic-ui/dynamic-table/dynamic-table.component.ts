@@ -8,6 +8,7 @@ export interface TableColumn {
   type?: 'text' | 'badge' | 'date' | 'custom';
   badgeColors?: Record<string, string>;
   customTemplate?: TemplateRef<any>;
+  defaultFilter?: string;
 }
 
 @Component({
@@ -20,6 +21,10 @@ export interface TableColumn {
 export class DynamicTableComponent {
   @Input() data: any[] = [];
   @Input() columns: TableColumn[] = [];
+
+  // Columns that should show a filter
+  @Input() filtersToShow: TableColumn[] = [];
+
   @Input() searchQuery: string = '';
   @Input() filters: Record<string, any> = {};
   @Output() rowClick = new EventEmitter<any>();
@@ -28,6 +33,12 @@ export class DynamicTableComponent {
 
   /** Utility to get keys of an object (used for badge filters) */
   objectKeys = Object.keys;
+
+  /** Get unique values from data for text filter dropdowns */
+  getUniqueValues(columnKey: string): string[] {
+    const vals = this.data.map(d => d[columnKey]).filter(Boolean);
+    return Array.from(new Set(vals));
+  }
 
   /** Filtered + searched dataset */
   filteredData(): any[] {

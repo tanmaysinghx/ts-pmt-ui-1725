@@ -9,7 +9,7 @@
     <ng-container *ngFor="let col of columns">
       <select *ngIf="col.type === 'badge'" [(ngModel)]="filters[col.key]"
         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-        <option value="">Filter {{ col.label }}</option>
+        <option value="">{{ col.label }} (All)</option>
         <option *ngFor="let val of objectKeys(col.badgeColors || {})" [value]="val">
           {{ val }}
         </option>
