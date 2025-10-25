@@ -1,6 +1,6 @@
 <div class="px-4 py-10 mx-auto">
   <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
-    
+
     <!-- Header -->
     <div class="px-6 py-4 border-b border-gray-200">
       <div class="flex justify-between items-center">
@@ -19,14 +19,18 @@
           <button (click)="triggerPipeline()" [disabled]="isRunning"
             class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed">
             <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
+              <path fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+                clip-rule="evenodd"></path>
             </svg>
             {{ isRunning ? 'Running...' : 'Run Pipeline' }}
           </button>
           <button *ngIf="isRunning" (click)="stopPipeline()"
             class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-medium">
             <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd"></path>
+              <path fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z"
+                clip-rule="evenodd"></path>
             </svg>
             Stop
           </button>
@@ -62,33 +66,58 @@
       </div>
     </div>
 
+    <!-- Add this after the existing info bar -->
+    <div *ngIf="buildParameters && currentBuild?.status === 'RUNNING'"
+      class="px-6 py-2 bg-blue-50 border-b border-blue-200">
+      <div class="flex items-center gap-4 text-xs">
+        <span class="font-semibold text-blue-700">Build Parameters:</span>
+        <span class="text-blue-600">Environment: <strong>{{ buildParameters.environment }}</strong></span>
+        <span class="text-blue-600">Branch: <strong>{{ buildParameters.branch }}</strong></span>
+        <span *ngIf="buildParameters.version" class="text-blue-600">Version: <strong>{{ buildParameters.version
+            }}</strong></span>
+      </div>
+    </div>
+
+
     <!-- Stage Visualization (Jenkins-like) -->
     <div class="p-6">
       <h2 class="text-lg font-semibold text-gray-800 mb-4">Pipeline Stages</h2>
-      
+
       <!-- Stages Flow -->
       <div class="flex items-start gap-2 overflow-x-auto pb-4">
         <div *ngFor="let stage of stages; let i = index" class="flex items-center">
           <!-- Stage Box -->
           <div class="flex flex-col items-center min-w-[140px]">
             <!-- Stage Card -->
-            <div class="w-32 h-32 rounded-lg border-2 flex flex-col items-center justify-center cursor-pointer transition-all hover:shadow-lg"
-              [ngClass]="getStageBoxClass(stage.status)"
-              (click)="selectStage(stage)">
-              
+            <div
+              class="w-32 h-32 rounded-lg border-2 flex flex-col items-center justify-center cursor-pointer transition-all hover:shadow-lg"
+              [ngClass]="getStageBoxClass(stage.status)" (click)="selectStage(stage)">
+
               <!-- Stage Icon -->
               <div class="mb-2">
-                <svg *ngIf="stage.status === 'success'" class="w-12 h-12 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                <svg *ngIf="stage.status === 'success'" class="w-12 h-12 text-green-600" fill="currentColor"
+                  viewBox="0 0 20 20">
+                  <path fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clip-rule="evenodd"></path>
                 </svg>
-                <svg *ngIf="stage.status === 'failure'" class="w-12 h-12 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                <svg *ngIf="stage.status === 'failure'" class="w-12 h-12 text-red-600" fill="currentColor"
+                  viewBox="0 0 20 20">
+                  <path fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clip-rule="evenodd"></path>
                 </svg>
-                <svg *ngIf="stage.status === 'running'" class="w-12 h-12 text-blue-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                <svg *ngIf="stage.status === 'running'" class="w-12 h-12 text-blue-600 animate-spin" fill="none"
+                  stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                  </path>
                 </svg>
-                <svg *ngIf="stage.status === 'pending'" class="w-12 h-12 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                <svg *ngIf="stage.status === 'pending'" class="w-12 h-12 text-gray-400" fill="currentColor"
+                  viewBox="0 0 20 20">
+                  <path fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                    clip-rule="evenodd"></path>
                 </svg>
               </div>
 
@@ -104,8 +133,7 @@
             <!-- Progress Bar (for running stage) -->
             <div *ngIf="stage.status === 'running'" class="w-32 mt-2">
               <div class="h-1 bg-gray-200 rounded-full overflow-hidden">
-                <div class="h-1 bg-blue-600 rounded-full transition-all" 
-                  [style.width]="stage.progress + '%'"></div>
+                <div class="h-1 bg-blue-600 rounded-full transition-all" [style.width]="stage.progress + '%'"></div>
               </div>
               <p class="text-xs text-center text-gray-500 mt-1">{{ stage.progress }}%</p>
             </div>
@@ -114,7 +142,9 @@
           <!-- Arrow (not for last stage) -->
           <div *ngIf="i < stages.length - 1" class="px-2">
             <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+              <path fill-rule="evenodd"
+                d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
+                clip-rule="evenodd"></path>
             </svg>
           </div>
         </div>
@@ -129,7 +159,9 @@
           <h3 class="text-base font-semibold text-gray-800">{{ selectedStage.name }} Details</h3>
           <button (click)="selectedStage = null" class="text-gray-500 hover:text-gray-700">
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+              <path fill-rule="evenodd"
+                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                clip-rule="evenodd"></path>
             </svg>
           </button>
         </div>
@@ -164,7 +196,8 @@
           </div>
 
           <!-- Console Logs -->
-          <div class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-xs overflow-x-auto max-h-64 overflow-y-auto">
+          <div
+            class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-xs overflow-x-auto max-h-64 overflow-y-auto">
             <div *ngFor="let log of selectedStage.logs" class="mb-1">
               <span class="text-gray-500">[{{ log.timestamp | date:'HH:mm:ss' }}]</span>
               <span [ngClass]="getLogTypeClass(log.type)">{{ log.message }}</span>
@@ -193,7 +226,7 @@
             <tr *ngFor="let build of buildHistory" class="hover:bg-gray-50">
               <td class="px-4 py-3 text-sm font-semibold text-gray-900">#{{ build.buildNumber }}</td>
               <td class="px-4 py-3">
-                <span class="inline-flex px-2 py-1 text-xs font-medium rounded" 
+                <span class="inline-flex px-2 py-1 text-xs font-medium rounded"
                   [ngClass]="getStatusBadgeClass(build.status)">
                   {{ build.status }}
                 </span>
@@ -202,8 +235,7 @@
               <td class="px-4 py-3 text-sm text-gray-700">{{ build.triggeredBy }}</td>
               <td class="px-4 py-3 text-sm text-gray-500">{{ build.startTime | date:'short' }}</td>
               <td class="px-4 py-3">
-                <button (click)="loadBuild(build)" 
-                  class="text-xs text-blue-600 hover:text-blue-800 font-medium">
+                <button (click)="loadBuild(build)" class="text-xs text-blue-600 hover:text-blue-800 font-medium">
                   View
                 </button>
               </td>
@@ -212,6 +244,11 @@
         </table>
       </div>
     </div>
-
   </div>
+  <app-build-parameters-modal 
+    [isOpen]="showParametersModal" 
+    [pipelineName]="pipeline?.name || ''"
+    (onClose)="closeParametersModal()" 
+    (onTrigger)="triggerPipelineWithParams($event)">
+  </app-build-parameters-modal>
 </div>

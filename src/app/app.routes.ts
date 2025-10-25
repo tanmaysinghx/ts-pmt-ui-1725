@@ -12,7 +12,8 @@ import { TicketDescriptionComponent } from './features/tickets/components/ticket
 import { AssignedTicketsComponent } from './features/tickets/components/assigned-tickets/assigned-tickets.component';
 import { ViewProfileComponent } from './features/profile/view-profile/view-profile.component';
 import { PipelineOverviewComponent } from './features/pipelines/components/pipeline-overview/pipeline-overview.component';
-import { PipelineExecutionComponent } from './features/pipelines/pipeline-execution/pipeline-execution.component';
+import { PipelineExecutionComponent } from './features/pipelines/components/pipeline-execution/pipeline-execution.component';
+import { BuildParametersModalComponent } from './features/pipelines/components/build-parameters-modal/build-parameters-modal.component';
 
 export const routes: Routes = [
     {
@@ -46,7 +47,7 @@ export const routes: Routes = [
 
             /* Pipeline Feature Routes */
             { path: 'pipelines/pipelines-overview', component: PipelineOverviewComponent },
-            { path: 'pipelines/pipelines-execution', component: PipelineExecutionComponent },
+            { path: 'pipelines/pipelines-execution/:pipelineId', component: PipelineExecutionComponent },
         ]
     },
 ];

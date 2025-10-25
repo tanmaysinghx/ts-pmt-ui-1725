@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { interval, Subscription } from 'rxjs';
+import { BuildParametersModalComponent } from "../build-parameters-modal/build-parameters-modal.component";
 
 interface ConsoleLog {
   timestamp: Date;
@@ -43,7 +44,7 @@ interface Pipeline {
   selector: 'app-pipeline-execution',
   templateUrl: './pipeline-execution.component.html',
   standalone: true,
-  imports: [CommonModule]
+  imports: [CommonModule, BuildParametersModalComponent]
 })
 export class PipelineExecutionComponent implements OnInit {
   pipeline: Pipeline | null = null;
@@ -52,6 +53,10 @@ export class PipelineExecutionComponent implements OnInit {
   stages: Stage[] = [];
   selectedStage: Stage | null = null;
   isRunning: boolean = false;
+  
+  // Modal state
+  showParametersModal: boolean = false;
+  buildParameters: any = null;
   
   private buildSubscription: Subscription | null = null;
   private currentStageIndex: number = 0;
@@ -62,7 +67,7 @@ export class PipelineExecutionComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const pipelineId = this.route.snapshot.params['id'];
+    const pipelineId = this.route.snapshot.params['pipelineId'];
     this.loadPipeline(pipelineId);
     this.loadBuildHistory();
   }
@@ -195,9 +200,30 @@ export class PipelineExecutionComponent implements OnInit {
     ];
   }
 
+  // UPDATED: Show modal instead of starting build directly
   triggerPipeline(): void {
     if (this.isRunning) return;
+    
+    // Show parameters modal
+    this.showParametersModal = true;
+  }
 
+  // Close modal
+  closeParametersModal(): void {
+    this.showParametersModal = false;
+  }
+
+  // Trigger with parameters
+  triggerPipelineWithParams(params: any): void {
+    console.log('Build triggered with parameters:', params);
+    this.buildParameters = params;
+    
+    // Start the build with parameters
+    this.startBuildExecution();
+  }
+
+  // NEW: Actual build execution
+  startBuildExecution(): void {
     this.isRunning = true;
     this.currentStageIndex = 0;
     
@@ -211,6 +237,11 @@ export class PipelineExecutionComponent implements OnInit {
       commitHash: this.generateCommitHash(),
       stages: [...this.stages]
     };
+
+    // Log build parameters
+    if (this.buildParameters) {
+      console.log('Build parameters:', this.buildParameters);
+    }
 
     // Reset all stages
     this.initializeStages();
@@ -230,14 +261,12 @@ export class PipelineExecutionComponent implements OnInit {
     stage.progress = 0;
     stage.startTime = new Date();
     
-    // Add initial log
     stage.logs.push({
       timestamp: new Date(),
       type: 'info',
       message: `Starting ${stage.name} stage...`
     });
 
-    // Simulate stage progress
     let progress = 0;
     const progressInterval = setInterval(() => {
       progress += Math.random() * 15;
@@ -245,7 +274,6 @@ export class PipelineExecutionComponent implements OnInit {
       
       stage.progress = Math.floor(progress);
       
-      // Add random logs
       if (Math.random() > 0.7) {
         stage.logs.push(this.generateRandomLog(stage.name));
       }
@@ -253,7 +281,6 @@ export class PipelineExecutionComponent implements OnInit {
       if (progress >= 100) {
         clearInterval(progressInterval);
         
-        // Random success/failure (90% success rate)
         const isSuccess = Math.random() > 0.1;
         
         if (isSuccess) {
@@ -266,11 +293,9 @@ export class PipelineExecutionComponent implements OnInit {
             message: `${stage.name} completed successfully ✓`
           });
           
-          // Move to next stage
           this.currentStageIndex++;
           setTimeout(() => this.runNextStage(), 1000);
         } else {
-          // Stage failed
           stage.status = 'failure';
           stage.endTime = new Date();
           stage.duration = this.calculateDuration(stage.startTime, stage.endTime);
@@ -297,7 +322,6 @@ export class PipelineExecutionComponent implements OnInit {
         new Date()
       );
       
-      // Add to history
       this.buildHistory.unshift({ ...this.currentBuild });
     }
   }
@@ -312,12 +336,10 @@ export class PipelineExecutionComponent implements OnInit {
         new Date()
       );
       
-      // Mark remaining stages as pending
       for (let i = this.currentStageIndex + 1; i < this.stages.length; i++) {
         this.stages[i].status = 'pending';
       }
       
-      // Add to history
       this.buildHistory.unshift({ ...this.currentBuild });
     }
   }
@@ -329,7 +351,6 @@ export class PipelineExecutionComponent implements OnInit {
     if (confirmed) {
       this.isRunning = false;
       
-      // Mark current stage as failed
       if (this.currentStageIndex < this.stages.length) {
         const stage = this.stages[this.currentStageIndex];
         stage.status = 'failure';
@@ -359,7 +380,6 @@ export class PipelineExecutionComponent implements OnInit {
   }
 
   loadBuild(build: Build): void {
-    // In a real app, this would load the full build details from API
     console.log('Load build:', build);
   }
 
@@ -367,7 +387,6 @@ export class PipelineExecutionComponent implements OnInit {
     this.router.navigate(['/pipelines']);
   }
 
-  // Helper methods
   generateCommitHash(): string {
     return Math.random().toString(36).substring(2, 9);
   }
@@ -418,7 +437,6 @@ export class PipelineExecutionComponent implements OnInit {
     return errors[Math.floor(Math.random() * errors.length)];
   }
 
-  // CSS Helper methods
   getStageBoxClass(status: string): string {
     const classes: Record<string, string> = {
       'success': 'bg-green-50 border-green-300 hover:bg-green-100',

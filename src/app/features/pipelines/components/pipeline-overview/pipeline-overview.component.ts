@@ -305,7 +305,7 @@ export class PipelineOverviewComponent implements OnInit {
   }
 
   viewDetails(pipeline: Pipeline): void {
-    this.router.navigate(['/pipelines', pipeline.id, 'execution']);
+    this.router.navigate(['/pipelines/pipelines-execution', pipeline.id]);
   }
 
   viewLogs(pipeline: Pipeline): void {

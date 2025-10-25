@@ -136,7 +136,7 @@ export class LeftMenuComponent {
       children: [
         {
           name: 'Pipeline Overview',
-          route: '/PipelineOverview',
+          route: '/pipelines/pipelines-overview',
           icon: '<path d="M3 3v18h18V3H3zm16 16H5V5h14v14z"></path><path d="M7 7h2v2H7zm0 4h2v2H7zm0 4h2v2H7zm4-8h2v2h-2zm0 4h2v2h-2zm0 4h2v2h-2z"></path>'
         },
         {
