@@ -56,6 +56,11 @@ export class CreateTicketComponent implements OnInit {
   private getPrefillData(cmsPrefill: any, stateTicket?: any) {
     let prefill = { ...cmsPrefill };
 
+    const today = new Date();
+    const sevenDaysLater = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 7);
+    const formattedDate = sevenDaysLater.toISOString().split('T')[0];
+    const defaultPriority = 'Medium';
+
     if (stateTicket) {
       this.snackbar.show(
         'Replicating Ticket...',
@@ -64,6 +69,7 @@ export class CreateTicketComponent implements OnInit {
         4000,
         'type1'
       );
+
       prefill = {
         ...prefill,
         title: stateTicket.title || '',
@@ -80,10 +86,44 @@ export class CreateTicketComponent implements OnInit {
         comments: stateTicket.comments && stateTicket.comments.length
           ? this.extractCommentsText(stateTicket.comments)
           : ['']
-      }
-      return prefill;
+      };
+    } else {
+      // Auto-set due date 7 days from now
+      const today = new Date();
+      const sevenDaysLater = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 7);
+      const formattedDate = sevenDaysLater.toISOString().split('T')[0];
+
+      prefill = {
+        ...prefill,
+        title: prefill.title || '',
+        description: prefill.description || '',
+        status: prefill.status || 'CREATED',
+        priority: prefill.priority || 'Medium',
+        assignedToGroup: prefill.assignedToGroup || '',
+        assignedToTeam: prefill.assignedToTeam || '',
+        assignedToUser: prefill.assignedToUser || localStorage.getItem('user-email') || '',
+        tags: prefill.tags || [],
+        attachments: prefill.attachments || [],
+        reportedBy: prefill.reportedBy || localStorage.getItem('user-email') || '',
+        dueDate: prefill.dueDate
+          ? new Date(prefill.dueDate).toISOString().split('T')[0]
+          : formattedDate, // auto-set 7 days ahead
+        comments: prefill.comments || []
+      };
+
+      // Notify user about the auto-set due date
+      this.snackbar.show(
+        'Info',
+        `Due date is automatically set to ${formattedDate} and priority is set to "${defaultPriority}". You can modify them if needed.`,
+        'info',
+        5000,
+        'type1'
+      );
     }
+
+    return prefill;
   }
+
 
   /** Extract only the comment texts from the ticket */
   private extractCommentsText(ticketComments: any[]): string[] {
@@ -102,7 +142,7 @@ export class CreateTicketComponent implements OnInit {
     // Ensure comments is always an array of objects
     payload.comments = Array.isArray(payload.comments)
       ? payload.comments.map((c: any) => ({ commenter: c.commenter || 'agent123@example.com', comment: c.comment }))
-      : [{ commenter: 'agent123@example.com', comment: payload.comments }];
+      : [{ commenter: localStorage.getItem("user-email"), comment: payload.comments }];
 
     payload.tags = Array.isArray(payload.tags) ? payload.tags : [payload.tags];
     payload.email = payload.email || 'tanmaysinghx99@gmail.com';

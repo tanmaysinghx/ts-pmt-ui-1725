@@ -15,7 +15,7 @@ export class AssignedTicketsComponent implements OnInit {
   searchQuery: string = '';
   filters = { priority: '', status: '' };
   assignedTickets: any[] = [];
-  assignedUserEmail: string = 'charlie@example.com';
+  assignedUserEmail: any = localStorage.getItem('user-email') || '';
 
   constructor(private readonly router: Router, private readonly http: HttpClient) { }
 
