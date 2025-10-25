@@ -368,8 +368,15 @@ export class TicketDescriptionComponent implements OnInit {
     return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + ' ' + sizes[i];
   }
 
-  isPDF(fileName: string): boolean { return fileName?.toLowerCase().endsWith('.pdf'); }
-  isImage(fileName: string): boolean { return ['.jpg', '.jpeg', '.png', '.gif'].some(ext => fileName.toLowerCase().endsWith(ext)); }
+  isPDF(fileName: string): boolean {
+    return fileName ? fileName.toLowerCase().endsWith('.pdf') : false;
+  }
+
+  isImage(fileName: string): boolean {
+    if (!fileName) return false;
+    return ['.jpg', '.jpeg', '.png', '.gif'].some(ext => fileName.toLowerCase().endsWith(ext));
+  }
+
   removeSelectedFile(index: number): void { this.uploadedFiles.splice(index, 1); }
   viewAttachment(att: any): void { if (att.fileUrl) window.open(att.fileUrl, '_blank'); }
   deleteAttachment(att: any): void { if (confirm(`Delete ${att.fileName}?`)) this.notify('Attachment delete not implemented', 'info', 'Info'); }

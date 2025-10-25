@@ -1,0 +1,305 @@
+<div class="px-4 py-10 mx-auto">
+  <div class="bg-white border border-gray-200 rounded-xl shadow-sm px-6 py-8">
+
+    <!-- Title -->
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-800">Pipelines Overview</h1>
+        <p class="text-sm text-gray-500 mt-1">Monitor and manage your CI/CD pipelines</p>
+      </div>
+      <div class="flex gap-2">
+        <button (click)="refreshPipelines()" 
+          class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm font-medium">
+          <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          Refresh
+        </button>
+        <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium">
+          + New Pipeline
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+      <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-500">Total</p>
+            <p class="text-2xl font-bold text-gray-800">{{ pipelines.length }}</p>
+          </div>
+          <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-500">Success</p>
+            <p class="text-2xl font-bold text-green-600">{{ getSuccessRate() }}%</p>
+          </div>
+          <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-500">Running</p>
+            <p class="text-2xl font-bold text-yellow-600">{{ getRunningCount() }}</p>
+          </div>
+          <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-500">Failed</p>
+            <p class="text-2xl font-bold text-red-600">{{ getFailedCount() }}</p>
+          </div>
+          <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-500">Avg Duration</p>
+            <p class="text-2xl font-bold text-purple-600">{{ getAvgDuration() }}</p>
+          </div>
+          <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter & Search -->
+    <div class="mb-6 flex flex-wrap gap-3 items-center">
+      <select [(ngModel)]="selectedEnvironment" (change)="filterPipelines()"
+        class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+        <option value="">All Environments</option>
+        <option value="Dev">Dev</option>
+        <option value="QA">QA</option>
+        <option value="Staging">Staging</option>
+        <option value="Production">Production</option>
+      </select>
+
+      <select [(ngModel)]="selectedStatus" (change)="filterPipelines()"
+        class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+        <option value="">All Statuses</option>
+        <option value="SUCCESS">Success</option>
+        <option value="RUNNING">Running</option>
+        <option value="FAILURE">Failure</option>
+        <option value="PENDING">Pending</option>
+      </select>
+
+      <input type="text" [(ngModel)]="searchQuery" (input)="filterPipelines()" placeholder="Search pipelines..."
+        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+
+      <div class="flex gap-2">
+        <button [class.bg-blue-100]="viewMode === 'list'" [class.text-blue-700]="viewMode === 'list'"
+          (click)="viewMode = 'list'"
+          class="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+          </svg>
+        </button>
+        <button [class.bg-blue-100]="viewMode === 'compact'" [class.text-blue-700]="viewMode === 'compact'"
+          (click)="viewMode = 'compact'"
+          class="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Pipeline List - Enhanced with Multiple Stages -->
+    <div class="space-y-4">
+      <div *ngFor="let pipeline of filteredPipelines"
+        class="bg-white border border-gray-200 rounded-xl shadow-md hover:shadow-lg transition overflow-hidden">
+
+        <div class="flex items-stretch">
+          <!-- Status Indicator Bar -->
+          <div class="w-2" [ngClass]="getStatusBarClass(pipeline.status)"></div>
+
+          <!-- Pipeline Info -->
+          <div class="flex-1">
+            <!-- Main Info Row -->
+            <div class="p-4 grid grid-cols-12 gap-4 items-center">
+              
+              <!-- Name & Service (3 cols) -->
+              <div class="col-span-12 md:col-span-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm"
+                    [ngClass]="getIconBgClass(pipeline.status)">
+                    {{ pipeline.name.substring(0, 2).toUpperCase() }}
+                  </div>
+                  <div>
+                    <h3 class="text-base font-semibold text-gray-900">{{ pipeline.name }}</h3>
+                    <p class="text-xs text-gray-500">{{ pipeline.serviceName }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Environment & Status (2 cols) -->
+              <div class="col-span-6 md:col-span-2">
+                <div class="flex flex-wrap gap-1">
+                  <span class="inline-block px-2 py-1 text-xs font-medium rounded bg-gray-100 text-gray-700">
+                    {{ pipeline.environment }}
+                  </span>
+                  <span class="inline-block px-2 py-1 text-xs font-medium rounded"
+                    [ngClass]="getStatusBadgeClass(pipeline.status)">
+                    {{ pipeline.status }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Build Stages Progress (4 cols) -->
+              <div class="col-span-12 md:col-span-4">
+                <div class="flex items-center gap-1">
+                  <div *ngFor="let stage of pipeline.stages" class="flex-1">
+                    <div class="flex items-center justify-between mb-1">
+                      <span class="text-xs text-gray-600 font-medium truncate">{{ stage.name }}</span>
+                      <span class="text-xs ml-1">{{ getStageIcon(stage.status) }}</span>
+                    </div>
+                    <div class="h-1.5 bg-gray-200 rounded-full">
+                      <div class="h-1.5 rounded-full transition-all" 
+                        [ngClass]="getStageProgressClass(stage.status)"
+                        [style.width]="stage.progress + '%'"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Version & Time (2 cols) -->
+              <div class="col-span-6 md:col-span-2">
+                <div class="text-xs space-y-1">
+                  <p class="text-gray-500">v<span class="font-medium text-gray-900">{{ pipeline.version }}</span></p>
+                  <p class="text-gray-500"><span class="font-medium text-gray-900">{{ pipeline.duration }}</span></p>
+                </div>
+              </div>
+
+              <!-- Actions (1 col) -->
+              <div class="col-span-6 md:col-span-1 flex justify-end gap-2">
+                <button (click)="toggleDetails(pipeline.id)" 
+                  class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
+                  [title]="expandedPipeline === pipeline.id ? 'Collapse' : 'Expand'">
+                  <svg class="w-5 h-5 transition-transform" 
+                    [class.rotate-180]="expandedPipeline === pipeline.id"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Expanded Details -->
+            <div *ngIf="expandedPipeline === pipeline.id" class="px-4 pb-4 border-t border-gray-100 pt-4">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <!-- Stage Details -->
+                <div *ngFor="let stage of pipeline.stages" class="bg-gray-50 rounded-lg p-3">
+                  <div class="flex items-center justify-between mb-2">
+                    <h4 class="text-sm font-semibold text-gray-900">{{ stage.name }}</h4>
+                    <span class="text-sm" [ngClass]="getStageTextClass(stage.status)">
+                      {{ stage.status }}
+                    </span>
+                  </div>
+                  <div class="space-y-1 text-xs text-gray-600">
+                    <p>Duration: <span class="font-medium">{{ stage.duration }}</span></p>
+                    <p>Started: <span class="font-medium">{{ stage.startTime | date:'short' }}</span></p>
+                    <p *ngIf="stage.endTime">Ended: <span class="font-medium">{{ stage.endTime | date:'short' }}</span></p>
+                    <p *ngIf="stage.error" class="text-red-600 font-medium mt-2">Error: {{ stage.error }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Actions Row -->
+              <div class="flex justify-between items-center pt-3 border-t border-gray-100">
+                <div class="flex items-center gap-4 text-xs text-gray-500">
+                  <span>Commit: <span class="font-mono font-medium text-gray-700">{{ pipeline.commitHash }}</span></span>
+                  <span>By: <span class="font-medium text-gray-700">{{ pipeline.triggeredBy }}</span></span>
+                  <span>Branch: <span class="font-medium text-gray-700">{{ pipeline.branch }}</span></span>
+                </div>
+                <div class="flex gap-2">
+                  <button (click)="viewLogs(pipeline)" 
+                    class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-xs font-medium">
+                    <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Logs
+                  </button>
+                  <button (click)="viewDetails(pipeline)" 
+                    class="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition text-xs font-medium">
+                    Details
+                  </button>
+                  <button (click)="retrigger(pipeline)" 
+                    [disabled]="pipeline.status === 'RUNNING'"
+                    class="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                    Retrigger
+                  </button>
+                  <button *ngIf="pipeline.status === 'RUNNING'" (click)="cancelPipeline(pipeline)"
+                    class="px-3 py-1.5 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition text-xs font-medium">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Compact Footer (when collapsed) -->
+            <div *ngIf="expandedPipeline !== pipeline.id"
+              class="px-4 py-2 bg-gray-50 border-t border-gray-100 flex justify-between items-center text-xs text-gray-500">
+              <div class="flex items-center gap-4">
+                <span>Commit: <span class="font-mono font-medium text-gray-700">{{ pipeline.commitHash }}</span></span>
+                <span>By: <span class="font-medium text-gray-700">{{ pipeline.triggeredBy }}</span></span>
+                <span>Branch: <span class="font-medium text-gray-700">{{ pipeline.branch }}</span></span>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="font-medium">{{ getTimeAgo(pipeline.lastBuild) }}</span>
+                <div class="flex gap-2">
+                  <button (click)="retrigger(pipeline); $event.stopPropagation()" 
+                    [disabled]="pipeline.status === 'RUNNING'"
+                    class="px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 transition text-xs font-medium disabled:opacity-50">
+                    Retrigger
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="filteredPipelines.length === 0" class="text-center py-12">
+      <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+        </path>
+      </svg>
+      <h3 class="text-lg font-medium text-gray-900 mb-1">No pipelines found</h3>
+      <p class="text-gray-500">Try adjusting your filters or search query</p>
+    </div>
+  </div>
+</div>

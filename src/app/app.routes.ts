@@ -11,6 +11,8 @@ import { SearchTicketsComponent } from './features/tickets/components/search-tic
 import { TicketDescriptionComponent } from './features/tickets/components/ticket-description/ticket-description.component';
 import { AssignedTicketsComponent } from './features/tickets/components/assigned-tickets/assigned-tickets.component';
 import { ViewProfileComponent } from './features/profile/view-profile/view-profile.component';
+import { PipelineOverviewComponent } from './features/pipelines/components/pipeline-overview/pipeline-overview.component';
+import { PipelineExecutionComponent } from './features/pipelines/pipeline-execution/pipeline-execution.component';
 
 export const routes: Routes = [
     {
@@ -41,6 +43,10 @@ export const routes: Routes = [
             /* Profle Feature Routes */
             { path: 'profile/view', component: ViewProfileComponent },
             { path: 'profile/edit', component: ViewProfileComponent },
+
+            /* Pipeline Feature Routes */
+            { path: 'pipelines/pipelines-overview', component: PipelineOverviewComponent },
+            { path: 'pipelines/pipelines-execution', component: PipelineExecutionComponent },
         ]
     },
 ];
