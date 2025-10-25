@@ -31,16 +31,36 @@
                     "label": "Created"
                 },
                 {
-                    "value": "IN_PROGRESS",
-                    "label": "In Progress"
+                    "value": "ASSIGNED",
+                    "label": "Assigned"
                 },
                 {
-                    "value": "RESOLVED",
-                    "label": "Resolved"
+                    "value": "OPEN",
+                    "label": "Open"
                 },
                 {
-                    "value": "ON_HOLD",
+                    "value": "RETEST",
+                    "label": "Retest"
+                },
+                {
+                    "value": "CLOSED",
+                    "label": "Closed"
+                },
+                {
+                    "value": "REOPENED",
+                    "label": "Reopened"
+                },
+                {
+                    "value": "ONHOLD",
                     "label": "On Hold"
+                },
+                {
+                    "value": "DUPLICATE",
+                    "label": "Duplicate"
+                },
+                {
+                    "value": "INVALID",
+                    "label": "Invalid"
                 }
             ],
             "defaultValue": "CREATED",

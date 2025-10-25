@@ -20,7 +20,7 @@ export class TicketDescriptionComponent implements OnInit {
   uploadedFiles: File[] = [];
 
   // ========== User & Input State ==========
-  currentUserEmail: string = 'charlie@example.com';
+  currentUserEmail: string = localStorage.getItem('user-email') || '';
   newComment: string = '';
   newDescription: string = '';
 
@@ -33,7 +33,17 @@ export class TicketDescriptionComponent implements OnInit {
   showHistory = false;
 
   // ========== Constants ==========
-  statusOptions: string[] = ['Open', 'In Progress', 'Resolved', 'Closed'];
+  statusOptions: string[] = [
+    'CREATED',
+    'ASSIGNED',
+    'OPEN',
+    'RETEST',
+    'CLOSED',
+    'REOPENED',
+    'ONHOLD',
+    'DUPLICATE',
+    'INVALID'
+  ];
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -63,7 +73,7 @@ export class TicketDescriptionComponent implements OnInit {
             attachments: t.attachments || []
           };
         }
-        console.log("jkjdjd", this.ticket)
+        console.log("Loaded ticket:", this.ticket);
       },
       error: (err) => console.error('Failed to load ticket:', err)
     });
@@ -129,30 +139,45 @@ export class TicketDescriptionComponent implements OnInit {
 
   getStatusCardClass(status: string): string {
     const classes: Record<string, string> = {
-      'Open': 'bg-blue-50 border-blue-300',
-      'In Progress': 'bg-purple-50 border-purple-300',
-      'Resolved': 'bg-green-50 border-green-300',
-      'Closed': 'bg-gray-50 border-gray-300'
+      'CREATED': 'bg-gray-50 border-gray-300',
+      'ASSIGNED': 'bg-blue-50 border-blue-300',
+      'OPEN': 'bg-cyan-50 border-cyan-300',
+      'RETEST': 'bg-orange-50 border-orange-300',
+      'CLOSED': 'bg-green-50 border-green-300',
+      'REOPENED': 'bg-yellow-50 border-yellow-300',
+      'ONHOLD': 'bg-purple-50 border-purple-300',
+      'DUPLICATE': 'bg-pink-50 border-pink-300',
+      'INVALID': 'bg-red-50 border-red-300'
     };
     return classes[status] || 'bg-gray-50 border-gray-300';
   }
 
   getStatusTextClass(status: string): string {
     const classes: Record<string, string> = {
-      'Open': 'text-blue-700',
-      'In Progress': 'text-purple-700',
-      'Resolved': 'text-green-700',
-      'Closed': 'text-gray-700'
+      'CREATED': 'text-gray-700',
+      'ASSIGNED': 'text-blue-700',
+      'OPEN': 'text-cyan-700',
+      'RETEST': 'text-orange-700',
+      'CLOSED': 'text-green-700',
+      'REOPENED': 'text-yellow-700',
+      'ONHOLD': 'text-purple-700',
+      'DUPLICATE': 'text-pink-700',
+      'INVALID': 'text-red-700'
     };
     return classes[status] || 'text-gray-700';
   }
 
   getStatusDotClass(status: string): string {
     const classes: Record<string, string> = {
-      'Open': 'bg-blue-500',
-      'In Progress': 'bg-purple-500',
-      'Resolved': 'bg-green-500',
-      'Closed': 'bg-gray-500'
+      'CREATED': 'bg-gray-500',
+      'ASSIGNED': 'bg-blue-500',
+      'OPEN': 'bg-cyan-500',
+      'RETEST': 'bg-orange-500',
+      'CLOSED': 'bg-green-500',
+      'REOPENED': 'bg-yellow-500',
+      'ONHOLD': 'bg-purple-500',
+      'DUPLICATE': 'bg-pink-500',
+      'INVALID': 'bg-red-500'
     };
     return classes[status] || 'bg-gray-500';
   }
@@ -175,43 +200,69 @@ export class TicketDescriptionComponent implements OnInit {
 
   // ========== Ticket Actions ==========
 
-  updateStatus(newStatus?: string): void {
+  updateStatus(newStatus: string): void {
     if (!newStatus) return;
 
-    this.ticketService.updateTicketStatus(this.ticket.ticketId, newStatus).subscribe({
+    const changedBy = localStorage.getItem('user-email') || this.currentUserEmail;
+
+    this.ticketService.updateTicketStatus(this.ticket.ticketId, newStatus, changedBy).subscribe({
       next: () => {
         this.ticket.status = newStatus;
+        console.log('Status updated successfully to:', newStatus);
       },
       error: (err) => console.error('Failed to update status:', err)
     });
   }
 
-  reassignTicket(): void {
+  updateTicket(): void {
     const payload = {
       assignedToUser: this.ticket.assignedToUser,
       assignedToTeam: this.ticket.assignedToTeam,
       assignedToGroup: this.ticket.assignedToGroup
     };
 
-    this.ticketService.reassignTicket(this.ticket.ticketId, payload).subscribe({
+    this.ticketService.updateTicket(this.ticket.ticketId, payload).subscribe({
       next: () => console.log('Ticket reassigned successfully'),
       error: (err) => console.error('Failed to reassign ticket:', err)
     });
   }
 
+  // Primary status actions
   startTicket(): void {
-    this.updateStatus('In Progress');
-  }
-
-  resolveTicket(): void {
-    this.updateStatus('Resolved');
+    this.updateStatus('OPEN');
   }
 
   closeTicket(): void {
     const confirmed = confirm('Are you sure you want to close this ticket?');
     if (confirmed) {
-      this.ticket.status = 'Closed';
-      this.updateStatus('Closed');
+      this.updateStatus('CLOSED');
+    }
+  }
+
+  reopenTicket(): void {
+    this.updateStatus('REOPENED');
+  }
+
+  // Secondary status actions
+  putOnHold(): void {
+    this.updateStatus('ONHOLD');
+  }
+
+  markAsRetest(): void {
+    this.updateStatus('RETEST');
+  }
+
+  markAsDuplicate(): void {
+    const confirmed = confirm('Are you sure this is a duplicate ticket?');
+    if (confirmed) {
+      this.updateStatus('DUPLICATE');
+    }
+  }
+
+  markAsInvalid(): void {
+    const confirmed = confirm('Are you sure this ticket is invalid?');
+    if (confirmed) {
+      this.updateStatus('INVALID');
     }
   }
 
@@ -235,6 +286,7 @@ export class TicketDescriptionComponent implements OnInit {
       commenter: this.currentUserEmail,
       comment: this.newComment
     };
+
     this.ticketService.addComment(this.ticket.ticketId, payload).subscribe({
       next: () => {
         this.ticket.comments.push({
@@ -263,6 +315,17 @@ export class TicketDescriptionComponent implements OnInit {
     });
   }
 
+  assignTicket(ticketData: any): void {
+    if (!ticketData) return;
+
+    this.ticketService.assignTicket(ticketData.ticketId, ticketData.assignedToUser, localStorage.getItem("user-email")).subscribe({
+      next: () => {
+        console.log('Ticket assigned successfully');
+      },
+      error: (err) => console.error('Failed to assign ticket:', err)
+    });
+  }
+
   // ========== History Actions ==========
 
   toggleHistory(): void {
@@ -273,7 +336,8 @@ export class TicketDescriptionComponent implements OnInit {
   }
 
   fetchTicketHistory(): void {
-    console.log("ticket id", this.ticket.ticketId);
+    console.log("Fetching history for ticket id:", this.ticket.ticketId);
+
     this.ticketService.getTicketHistory(this.ticket.ticketId).subscribe({
       next: (res) => {
         if (res?.success) {
@@ -304,4 +368,45 @@ export class TicketDescriptionComponent implements OnInit {
     console.log('Download attachment:', att);
     // TODO: Implement file download
   }
+
+  // ========== Attachment Helper Methods ==========
+
+  formatFileSize(bytes: number): string {
+    if (!bytes) return 'Unknown';
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + ' ' + sizes[i];
+  }
+
+  isPDF(fileName: string): boolean {
+    return fileName?.toLowerCase().endsWith('.pdf');
+  }
+
+  isImage(fileName: string): boolean {
+    const ext = fileName?.toLowerCase();
+    return ext?.endsWith('.jpg') || ext?.endsWith('.jpeg') || ext?.endsWith('.png') || ext?.endsWith('.gif');
+  }
+
+  removeSelectedFile(index: number): void {
+    this.uploadedFiles.splice(index, 1);
+  }
+
+  viewAttachment(att: any): void {
+    // Open attachment in new tab or modal
+    if (att.fileUrl) {
+      window.open(att.fileUrl, '_blank');
+    } else {
+      console.log('View attachment:', att);
+      // TODO: Implement attachment viewer
+    }
+  }
+
+  deleteAttachment(att: any): void {
+    const confirmed = confirm(`Are you sure you want to delete ${att.fileName}?`);
+    if (confirmed) {
+      // TODO: Implement delete attachment API call
+      console.log('Delete attachment:', att);
+    }
+  }
+
 }
