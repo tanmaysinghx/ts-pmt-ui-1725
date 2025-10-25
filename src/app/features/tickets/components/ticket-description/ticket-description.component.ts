@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TicketService } from '../../services/ticket.service';
@@ -13,36 +12,50 @@ import { TicketService } from '../../services/ticket.service';
   imports: [CommonModule, FormsModule]
 })
 export class TicketDescriptionComponent implements OnInit {
+  // ========== Data Properties ==========
   ticket: any = {};
+  ticketHistory: any[] = [];
+  teams: any[] = [];
+  groups: any[] = [];
+  uploadedFiles: File[] = [];
+
+  // ========== User & Input State ==========
   currentUserEmail: string = 'charlie@example.com';
   newComment: string = '';
   newDescription: string = '';
-  editMode: boolean = false;
-  showHistory: boolean = false;
-  ticketHistory: any[] = [];
-  uploadedFiles: File[] = [];
-  dummyPdf = '/assets/dummy.pdf';
-  myTicketId: any;
 
+  // ========== UI State ==========
+  editingStatus = false;
+  editingTeam = false;
+  editingGroup = false;
+  editingUser = false;
+  editingDescription = false;
+  showHistory = false;
+
+  // ========== Constants ==========
   statusOptions: string[] = ['Open', 'In Progress', 'Resolved', 'Closed'];
-  teams: any[] = [];
-  groups: any[] = [];
 
-  constructor(private readonly route: ActivatedRoute, private readonly http: HttpClient, private readonly ticketService: TicketService) { }
+  constructor(
+    private readonly route: ActivatedRoute,
+    private readonly ticketService: TicketService
+  ) { }
 
-  ngOnInit() {
+  ngOnInit(): void {
     const ticketId = this.route.snapshot.params['ticketId'];
-    this.myTicketId = ticketId;
-    this.loadTicket(ticketId);
-    this.loadTeamOptions();
-    this.loadGroupOptions();
+    if (ticketId) {
+      this.loadTicket(ticketId);
+      this.loadTeamOptions();
+      this.loadGroupOptions();
+    }
   }
 
-  loadTicket(ticketId: string) {
+  // ========== Data Loading ==========
+
+  loadTicket(ticketId: string): void {
     this.ticketService.getTicketById(ticketId).subscribe({
       next: (res) => {
-        if (res.success) {
-          const t = res?.data?.downstreamResponse?.data?.ticket;
+        if (res?.success) {
+          const t = res.data?.downstreamResponse?.data?.ticket;
           this.ticket = {
             ...t,
             dueDate: t.dueDate ? new Date(t.dueDate) : null,
@@ -50,32 +63,28 @@ export class TicketDescriptionComponent implements OnInit {
             attachments: t.attachments || []
           };
         }
+        console.log("jkjdjd", this.ticket)
       },
       error: (err) => console.error('Failed to load ticket:', err)
     });
   }
 
-  loadTeamOptions() {
-    const url = `http://localhost:1725/assets/data/assignedToTeam.json`;
-    this.http.get<any>(url).subscribe({
-      next: (res) => {
-        this.teams = res || [];
-      },
+  loadTeamOptions(): void {
+    this.ticketService.getTeamOptions().subscribe({
+      next: (res) => (this.teams = res || []),
       error: (err) => console.error('Failed to load teams', err)
     });
   }
 
-  loadGroupOptions() {
-    const url = `http://localhost:1725/assets/data/assignedToGroup.json`;
-    this.http.get<any>(url).subscribe({
-      next: (res) => {
-        this.groups = res || [];
-      },
+  loadGroupOptions(): void {
+    this.ticketService.getGroupOptions().subscribe({
+      next: (res) => (this.groups = res || []),
       error: (err) => console.error('Failed to load groups', err)
     });
   }
 
-  // --- Time & Priority ---
+  // ========== Time Calculations ==========
+
   getDaysLeft(dueDate: Date | string | null): number {
     if (!dueDate) return 0;
     const now = new Date().getTime();
@@ -88,113 +97,211 @@ export class TicketDescriptionComponent implements OnInit {
     return days === 0 ? '⏰ Overdue!' : `⏰ Due in ${days} day${days > 1 ? 's' : ''}`;
   }
 
-  timeLeftTextClass(ticket: any): string {
+  // ========== CSS Class Helpers ==========
+
+  getHeaderClass(ticket: any): string {
     const days = this.getDaysLeft(ticket.dueDate);
-    if (days > 7) return 'text-green-600 font-semibold';
-    if (days > 3) return 'text-yellow-600 font-semibold';
-    if (days >= 1) return 'text-orange-600 font-semibold';
-    return 'text-red-600 font-bold';
+    if (days === 0) return 'bg-gradient-to-r from-red-500 to-red-600';
+    if (days <= 3) return 'bg-gradient-to-r from-orange-500 to-orange-600';
+    if (days <= 7) return 'bg-gradient-to-r from-yellow-500 to-yellow-600';
+    return 'bg-gradient-to-r from-green-500 to-green-600';
   }
 
-  timeLeftClass(ticket: any): string {
+  getPriorityCardClass(priority: string): string {
+    const classes: Record<string, string> = {
+      'Critical': 'bg-red-50 border-red-300',
+      'High': 'bg-orange-50 border-orange-300',
+      'Medium': 'bg-yellow-50 border-yellow-300',
+      'Low': 'bg-green-50 border-green-300'
+    };
+    return classes[priority] || 'bg-gray-50 border-gray-300';
+  }
+
+  getPriorityTextClass(priority: string): string {
+    const classes: Record<string, string> = {
+      'Critical': 'text-red-700',
+      'High': 'text-orange-700',
+      'Medium': 'text-yellow-700',
+      'Low': 'text-green-700'
+    };
+    return classes[priority] || 'text-gray-700';
+  }
+
+  getStatusCardClass(status: string): string {
+    const classes: Record<string, string> = {
+      'Open': 'bg-blue-50 border-blue-300',
+      'In Progress': 'bg-purple-50 border-purple-300',
+      'Resolved': 'bg-green-50 border-green-300',
+      'Closed': 'bg-gray-50 border-gray-300'
+    };
+    return classes[status] || 'bg-gray-50 border-gray-300';
+  }
+
+  getStatusTextClass(status: string): string {
+    const classes: Record<string, string> = {
+      'Open': 'text-blue-700',
+      'In Progress': 'text-purple-700',
+      'Resolved': 'text-green-700',
+      'Closed': 'text-gray-700'
+    };
+    return classes[status] || 'text-gray-700';
+  }
+
+  getStatusDotClass(status: string): string {
+    const classes: Record<string, string> = {
+      'Open': 'bg-blue-500',
+      'In Progress': 'bg-purple-500',
+      'Resolved': 'bg-green-500',
+      'Closed': 'bg-gray-500'
+    };
+    return classes[status] || 'bg-gray-500';
+  }
+
+  getDueCardClass(ticket: any): string {
     const days = this.getDaysLeft(ticket.dueDate);
-    if (days > 7) return 'border-green-400 bg-green-50';
-    if (days > 3) return 'border-yellow-400 bg-yellow-50';
-    if (days >= 1) return 'border-orange-400 bg-orange-50';
-    return 'border-red-400 bg-red-50';
+    if (days === 0) return 'bg-red-50 border-red-300';
+    if (days <= 3) return 'bg-orange-50 border-orange-300';
+    if (days <= 7) return 'bg-yellow-50 border-yellow-300';
+    return 'bg-green-50 border-green-300';
   }
 
-  priorityClass(priority: string): string {
-    switch (priority) {
-      case 'Critical': return 'text-red-600 font-semibold';
-      case 'High': return 'text-orange-600 font-medium';
-      case 'Medium': return 'text-yellow-600';
-      case 'Low': return 'text-green-600';
-      default: return '';
-    }
+  getDueTextClass(ticket: any): string {
+    const days = this.getDaysLeft(ticket.dueDate);
+    if (days === 0) return 'text-red-700';
+    if (days <= 3) return 'text-orange-700';
+    if (days <= 7) return 'text-yellow-700';
+    return 'text-green-700';
   }
 
-  // --- Status & Assignment ---
-  updateStatus(newStatus: string) {
-    const url = `http://localhost:1674/api/v1/tickets/update-status/${this.ticket.id}`;
-    this.http.post(url, { status: newStatus }).subscribe({
-      next: () => this.ticket.status = newStatus,
+  // ========== Ticket Actions ==========
+
+  updateStatus(newStatus?: string): void {
+    if (!newStatus) return;
+
+    this.ticketService.updateTicketStatus(this.ticket.ticketId, newStatus).subscribe({
+      next: () => {
+        this.ticket.status = newStatus;
+      },
       error: (err) => console.error('Failed to update status:', err)
     });
   }
 
-  reassignTicket() {
-    const url = `http://localhost:1674/api/v1/tickets/reassign-user/${this.ticket.id}`;
-    this.http.post(url, {
+  reassignTicket(): void {
+    const payload = {
       assignedToUser: this.ticket.assignedToUser,
       assignedToTeam: this.ticket.assignedToTeam,
       assignedToGroup: this.ticket.assignedToGroup
-    }).subscribe({
+    };
+
+    this.ticketService.reassignTicket(this.ticket.ticketId, payload).subscribe({
       next: () => console.log('Ticket reassigned successfully'),
       error: (err) => console.error('Failed to reassign ticket:', err)
     });
   }
 
-  // --- Description ---
-  addNewDescription() {
+  startTicket(): void {
+    this.updateStatus('In Progress');
+  }
+
+  resolveTicket(): void {
+    this.updateStatus('Resolved');
+  }
+
+  closeTicket(): void {
+    const confirmed = confirm('Are you sure you want to close this ticket?');
+    if (confirmed) {
+      this.ticket.status = 'Closed';
+      this.updateStatus('Closed');
+    }
+  }
+
+  // ========== Description Actions ==========
+
+  addNewDescription(): void {
     if (!this.newDescription.trim()) return;
-    this.ticket.description += `\n__________________________________________\n${this.newDescription}`;
+
+    const separator = '\n' + '─'.repeat(40) + '\n';
+    const timestamp = new Date().toLocaleString();
+    this.ticket.description += `${separator}[Updated ${timestamp}]\n${this.newDescription}`;
     this.newDescription = '';
   }
 
-  // --- Comments ---
-  addComment() {
-    let payload = { commenter: this.currentUserEmail, comment: this.newComment };
-    this.ticketService.addComment(this.myTicketId, payload).subscribe({
+  // ========== Comment Actions ==========
+
+  addComment(): void {
+    if (!this.newComment.trim()) return;
+
+    const payload = {
+      commenter: this.currentUserEmail,
+      comment: this.newComment
+    };
+    this.ticketService.addComment(this.ticket.ticketId, payload).subscribe({
       next: () => {
-        this.ticket.comments.push({ commenter: this.currentUserEmail, comment: this.newComment });
+        this.ticket.comments.push({
+          commenter: this.currentUserEmail,
+          comment: this.newComment,
+          timestamp: new Date()
+        });
         this.newComment = '';
       },
-      error: err => console.error('Failed to add comment:', err)
+      error: (err) => console.error('Failed to add comment:', err)
     });
   }
 
-  editComment(index: number) {
-    const updated = prompt('Edit your comment:', this.ticket.comments[index].comment);
-    if (!updated) return;
-    const url = `http://localhost:1674/api/v1/tickets/edit-comment/${this.ticket.id}`;
-    this.http.post(url, { index, comment: updated }).subscribe({
-      next: () => this.ticket.comments[index].comment = updated,
-      error: err => console.error('Failed to edit comment:', err)
+  editComment(index: number): void {
+    const currentComment = this.ticket.comments[index]?.comment;
+    if (!currentComment) return;
+
+    const updated = prompt('Edit your comment:', currentComment);
+    if (!updated || updated === currentComment) return;
+
+    this.ticketService.editComment(this.ticket.ticketId, { index, comment: updated }).subscribe({
+      next: () => {
+        this.ticket.comments[index].comment = updated;
+      },
+      error: (err) => console.error('Failed to edit comment:', err)
     });
   }
 
-  // --- Ticket History ---
-  toggleHistory() {
+  // ========== History Actions ==========
+
+  toggleHistory(): void {
     this.showHistory = !this.showHistory;
     if (this.showHistory && this.ticketHistory.length === 0) {
       this.fetchTicketHistory();
     }
   }
 
-  fetchTicketHistory() {
-    // const url = `http://localhost:1674/api/v1/tickets/get-ticket-history/${this.ticket.id}`;
-    const url = "http://localhost:1674/api/v1/tickets/get-ticket-history/TCKT000002";
-    this.http.get<any>(url).subscribe({
-      next: res => this.ticketHistory = res?.data?.ticketHistory || [],
-      error: err => console.error('Failed to fetch ticket history:', err)
+  fetchTicketHistory(): void {
+    console.log("ticket id", this.ticket.ticketId);
+    this.ticketService.getTicketHistory(this.ticket.ticketId).subscribe({
+      next: (res) => {
+        if (res?.success) {
+          this.ticketHistory = res?.data?.downstreamResponse?.data?.ticketHistory || [];
+        }
+      },
+      error: (err) => console.error('Failed to fetch ticket history:', err)
     });
   }
 
-  // --- Attachments ---
-  onFileSelected(event: any) {
+  // ========== Attachment Actions ==========
+
+  onFileSelected(event: any): void {
     this.uploadedFiles = Array.from(event.target.files);
   }
 
-  uploadFiles() {
+  uploadFiles(): void {
     console.log('Uploading files:', this.uploadedFiles);
+    // TODO: Implement actual file upload
   }
 
-  openAttachment(att: any) { console.log('Open attachment:', att); }
-  downloadAttachment(att: any) { console.log('Download attachment:', att); }
+  openAttachment(att: any): void {
+    console.log('Open attachment:', att);
+    // TODO: Implement attachment viewer
+  }
 
-  // --- Ticket Lifecycle ---
-  startTicket() { this.updateStatus('In Progress'); }
-  resolveTicket() { this.updateStatus('Resolved'); }
-  closeTicket() { this.updateStatus('Closed'); }
+  downloadAttachment(att: any): void {
+    console.log('Download attachment:', att);
+    // TODO: Implement file download
+  }
 }
