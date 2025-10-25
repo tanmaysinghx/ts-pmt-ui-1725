@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-create-ticket',
+  standalone: true,
   imports: [CommonModule, FormsModule, DynamicFormComponent, SnackbarComponent],
   templateUrl: './create-ticket.component.html',
   styleUrl: './create-ticket.component.scss'
@@ -31,44 +32,87 @@ export class CreateTicketComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.getCMSData();
+    this.loadCMSData();
   }
 
-  getCMSData() {
+  /** Load CMS data and prefill the form */
+  private loadCMSData() {
+    const stateTicket = history.state.prefillTicket;
+
     this.ticketService.getCMSDataCreateTicket().subscribe({
       next: (config) => {
         this.ticketFormConfig = config.fields;
-        this.ticketData = this.cmsMapper.mapApiToForm(config.fields, config.prefillData);
+
+        const prefillData = this.getPrefillData(config.prefillData, stateTicket);
+        this.ticketData = this.cmsMapper.mapApiToForm(this.ticketFormConfig, prefillData);
       },
       error: (err) => {
-        this.snackbar.show('Error!', `Failed to create ticket: ${err}`, 'error', 4000, 'type1');
+        this.snackbar.show('Error!', `Failed to load ticket form: ${err}`, 'error', 4000, 'type1');
       }
     });
   }
 
+  /** Prepare prefill data for the form */
+  private getPrefillData(cmsPrefill: any, stateTicket?: any) {
+    let prefill = { ...cmsPrefill };
+
+    if (stateTicket) {
+      this.snackbar.show(
+        'Replicating Ticket...',
+        `Loading ticket #${stateTicket.id}`,
+        'info',
+        4000,
+        'type1'
+      );
+      prefill = {
+        ...prefill,
+        title: stateTicket.title || '',
+        description: stateTicket.description || '',
+        status: 'CREATED',
+        priority: stateTicket.priority || prefill.priority,
+        assignedToGroup: stateTicket.assignedToGroup || '',
+        assignedToTeam: stateTicket.assignedToTeam || '',
+        assignedToUser: stateTicket.assignedToUser || '',
+        tags: stateTicket.tags ? [...stateTicket.tags] : [],
+        attachments: stateTicket.attachments ? [...stateTicket.attachments] : [],
+        reportedBy: stateTicket.reportedBy || prefill.reportedBy,
+        dueDate: stateTicket.dueDate ? new Date(stateTicket.dueDate) : '',
+        comments: stateTicket.comments && stateTicket.comments.length
+          ? this.extractCommentsText(stateTicket.comments)
+          : ['']
+      }
+      return prefill;
+    }
+  }
+
+  /** Extract only the comment texts from the ticket */
+  private extractCommentsText(ticketComments: any[]): string[] {
+    if (!ticketComments || !ticketComments.length) return [''];
+    return ticketComments.map(c => c.comment || '');
+  }
+
+
+  /** Submit form */
   onFormSubmit(formValue: any) {
     const payload = this.cmsMapper.mapFormToApi(
       this.ticketFormConfig,
       formValue instanceof FormGroup ? formValue.getRawValue() : formValue
     );
 
-    payload.comments = [
-      {
-        commenter: 'agent123@example.com',
-        comment: payload.comments
-      }
-    ];
+    // Ensure comments is always an array of objects
+    payload.comments = Array.isArray(payload.comments)
+      ? payload.comments.map((c: any) => ({ commenter: c.commenter || 'agent123@example.com', comment: c.comment }))
+      : [{ commenter: 'agent123@example.com', comment: payload.comments }];
 
-    payload.tags = [payload.tags];
-
+    payload.tags = Array.isArray(payload.tags) ? payload.tags : [payload.tags];
     payload.email = payload.email || 'tanmaysinghx99@gmail.com';
+
     this.ticketService.generateTicket(payload).subscribe({
       next: (response: any) => {
-        console.log('API Response:', response);
         const ticketNumber = response?.data?.downstreamResponse?.data?.ticket?.ticketId;
         if (ticketNumber) {
           this.snackbar.show('Ticket Created!', `Your ticket has been successfully created: ${ticketNumber}`, 'success', 5000, 'type1');
-          this.navigateToViewTicketsScreen()
+          this.navigateToViewTicketsScreen();
         } else {
           this.snackbar.show('Error!', 'Failed to create ticket.', 'error', 4000, 'type1');
         }
@@ -79,38 +123,14 @@ export class CreateTicketComponent implements OnInit {
     });
   }
 
+  /** Handle button actions */
   onButtonClick(event: any) {
-    console.log('Button clicked:', event);
-    if (event.key === 'cancel') {
-      alert('Cancelled, going back...');
-    }
-    if (event.key === 'save') {
-      alert('Saved draft!');
-    }
+    if (event.key === 'cancel') alert('Cancelled, going back...');
+    if (event.key === 'save') alert('Saved draft!');
   }
 
-  navigateToViewTicketsScreen() {
-    setTimeout(() =>{
-      this.router.navigate(["tickets/view-tickets"]);
-    }, 7000);
-  }
-
-  showCustomSnackbar() {
-    this.snackbar.show('Ticket Created!', 'Your ticket has been successfully created.', 'success', 5000, 'type1');
-  }
-
-  showErrorList() {
-    this.snackbar.show(
-      'Validation errors occurred:',
-      '',
-      'error',
-      7000,
-      'type2',
-      [
-        "Username is already in use",
-        "Email field can't be empty",
-        "Please enter a valid phone number"
-      ]
-    );
+  /** Navigate back after ticket creation */
+  private navigateToViewTicketsScreen() {
+    setTimeout(() => this.router.navigate(["tickets/view-tickets"]), 7000);
   }
 }

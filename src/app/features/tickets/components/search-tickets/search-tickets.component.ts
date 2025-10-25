@@ -1,52 +1,68 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { TicketService } from '../../services/ticket.service';
 
 @Component({
   selector: 'app-search-tickets',
+  standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './search-tickets.component.html',
   styleUrl: './search-tickets.component.scss'
 })
-export class SearchTicketsComponent {
+export class SearchTicketsComponent implements OnInit {
   searchQuery: string = '';
   searched: boolean = false;
-
   recentSearches: string[] = [];
+  results: any[] = [];
+  allTickets: any[] = [];
 
-  results = [
-    {
-      id: 'TCK-1234',
-      title: 'VPN not working',
-      category: 'Incident',
-      priority: 'High',
-      status: 'Open',
-      createdAt: new Date()
-    },
-    {
-      id: 'TCK-5678',
-      title: 'Email setup request',
-      category: 'Installation',
-      priority: 'Medium',
-      status: 'Resolved',
-      createdAt: new Date()
-    }
-  ];
+  replicatingTicketId: string | null = null;
 
-  allTickets = [...this.results]; // this would be replaced by actual API call
+  constructor(
+    private readonly ticketService: TicketService,
+    private readonly router: Router
+  ) { }
+
+  ngOnInit() {
+    this.loadAllTickets();
+  }
+
+  /** Load all tickets from API */
+  loadAllTickets() {
+    this.ticketService.getAllTickets().subscribe({
+      next: (response: any) => {
+        const tickets = response?.data?.downstreamResponse?.data?.tickets || [];
+        this.allTickets = tickets.map((ticket: any) => ({
+          ...ticket, // keep all properties for replication
+          id: ticket.ticketId,
+          tags: ticket.tags?.join(', ') || '',
+          attachmentsCount: ticket.attachments?.length || 0,
+          createdAt: new Date(ticket.createdAt),
+          updatedAt: new Date(ticket.updatedAt),
+          dueDate: ticket.dueDate ? new Date(ticket.dueDate) : null
+        }));
+        this.results = [...this.allTickets];
+      },
+      error: (err) => console.error('Failed to fetch tickets:', err)
+    });
+  }
 
   performSearch() {
     this.searched = true;
-    if (this.searchQuery.trim()) {
-      this.addToRecentSearches(this.searchQuery.trim());
+    const query = this.searchQuery.trim().toLowerCase();
 
-      this.results = this.allTickets.filter(ticket =>
-        ticket.id.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        ticket.title.toLowerCase().includes(this.searchQuery.toLowerCase())
-      );
-    } else {
-      this.results = [];
+    if (!query) {
+      this.results = [...this.allTickets];
+      return;
     }
+
+    this.addToRecentSearches(query);
+    this.results = this.allTickets.filter(ticket =>
+      ticket.id.toLowerCase().includes(query) ||
+      ticket.title.toLowerCase().includes(query)
+    );
   }
 
   addToRecentSearches(query: string) {
@@ -62,13 +78,17 @@ export class SearchTicketsComponent {
   }
 
   goToTicket(ticketId: string) {
-    // Use Angular router navigation
-    console.log(`Navigate to ticket detail page for: ${ticketId}`);
+    this.router.navigate(['/ticket-description', ticketId]);
   }
 
   replicateTicket(ticket: any) {
-    // Navigate to create-ticket component with ticket prefilled
-    console.log('Replicating ticket:', ticket);
-    // Pass via query params or shared state
+    this.replicatingTicketId = ticket.id;
+
+    setTimeout(() => {
+      this.replicatingTicketId = null;
+      this.router.navigate(['/tickets/create-ticket'], {
+        state: { prefillTicket: ticket } // send all data
+      });
+    }, 2000);
   }
 }
