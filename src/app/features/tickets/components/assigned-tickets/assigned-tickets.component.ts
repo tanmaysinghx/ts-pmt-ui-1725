@@ -59,7 +59,7 @@ export class AssignedTicketsComponent implements OnInit {
   }
 
   goToTicket(ticketId: string) {
-    this.router.navigate(['/ticket', ticketId]);
+    this.router.navigate([`/tickets/ticket-description/${ticketId}`]);
   }
 
   refreshList() {
@@ -110,21 +110,5 @@ export class AssignedTicketsComponent implements OnInit {
       case 'Low': return 'text-green-600';
       default: return '';
     }
-  }
-
-  isUrgent(ticket: any): boolean {
-    const { days, hours } = this.getTimeLeft(ticket.dueDate);
-    return days < 2; // Less than 48 hours
-  }
-
-  // --- Optional: Visual Progress (%) bar ---
-  getProgressPercent(ticket: any): number {
-    if (!ticket.dueDate) return 0;
-    const created = ticket.createdAt ? new Date(ticket.createdAt).getTime() : new Date().getTime();
-    const due = new Date(ticket.dueDate).getTime();
-    const now = new Date().getTime();
-    const total = due - created;
-    const elapsed = now - created;
-    return Math.min(Math.max((elapsed / total) * 100, 0), 100);
   }
 }
