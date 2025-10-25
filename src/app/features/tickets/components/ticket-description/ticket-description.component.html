@@ -1,60 +1,127 @@
 <div class="px-4 py-10 mx-auto">
-  <div class="bg-white border border-gray-200 rounded-xl shadow-sm px-6 py-8">
+  <div class="bg-white border border-gray-200 rounded-xl shadow-md p-8 space-y-6">
 
     <!-- Title -->
-    <h1 class="text-2xl font-bold text-gray-800 mb-6">Ticket Details</h1>
+    <h1 class="text-3xl font-bold text-gray-800">Ticket Details</h1>
 
     <!-- Ticket Info -->
-    <div class="border rounded-lg p-4 shadow-sm mb-6" [ngClass]="timeLeftClass(ticket)">
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+    <div class="border rounded-lg p-6 shadow-sm" [ngClass]="timeLeftClass(ticket)">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
 
-        <!-- Left: Ticket Metadata -->
-        <div class="flex-1">
-          <h3 class="text-lg font-medium text-blue-600">
-            #{{ ticket.id }} - {{ ticket.title }}
-          </h3>
-
-          <p class="text-sm text-gray-600 mt-1">
-            Group: {{ ticket.assignedToGroup || 'N/A' }} |
-            Team: {{ ticket.assignedToTeam || 'N/A' }} |
-            User: {{ ticket.assignedToUser || 'N/A' }}
+        <!-- Left -->
+        <div class="flex-1 space-y-2">
+          <h3 class="text-xl font-semibold text-blue-600">#{{ ticket.id }} - {{ ticket.title }}</h3>
+          <p class="text-gray-600 text-sm">
+            Group: {{ ticket.assignedToGroup || 'N/A' }} | Team: {{ ticket.assignedToTeam || 'N/A' }} | User: {{ ticket.assignedToUser || 'N/A' }}
           </p>
-
-          <p class="text-sm text-gray-600 mt-1">
-            Priority: <span [ngClass]="priorityClass(ticket.priority)">
-              {{ ticket.priority }}
-            </span> | Status: {{ ticket.status }}
+          <p class="text-gray-600 text-sm">
+            Priority: <span [ngClass]="priorityClass(ticket.priority)">{{ ticket.priority }}</span> | Status: {{ ticket.status }}
           </p>
+          <p class="text-gray-500 text-sm">Due: {{ ticket.dueDate | date:'short' }}</p>
 
-          <p class="text-sm mt-1 text-gray-500">
-            Due: {{ ticket.dueDate | date:'short' }}
-          </p>
+          <!-- Description -->
+          <div class="mt-4 w-full">
+            <p class="text-gray-700 text-sm whitespace-pre-line">
+              {{ ticket.description }}
+            </p>
 
-          <p class="text-sm mt-2 text-gray-700">
-            {{ ticket.description }}
-          </p>
+            <!-- Editable Description -->
+            <div *ngIf="editMode" class="mt-3 w-full">
+              <label class="text-sm font-medium mb-1 block">Add New Description:</label>
+              <textarea [(ngModel)]="newDescription"
+                        rows="4"
+                        placeholder="Add additional details..."
+                        class="w-full px-4 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none bg-white"></textarea>
+              <button (click)="addNewDescription()"
+                      class="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm shadow">
+                Save Description
+              </button>
+            </div>
+          </div>
 
-          <div *ngIf="ticket.tags?.length" class="mt-2">
+          <!-- Tags -->
+          <div *ngIf="ticket.tags?.length" class="mt-3 flex flex-wrap gap-1">
             <span *ngFor="let tag of ticket.tags" 
-                  class="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full mr-1">
+                  class="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">
               {{ tag }}
             </span>
           </div>
         </div>
 
-        <!-- Right: Deadline -->
-        <div class="mt-2 md:mt-0 text-sm font-semibold" [ngClass]="timeLeftTextClass(ticket)">
+        <!-- Right (Due/Time) -->
+        <div class="text-sm font-semibold mt-2 md:mt-0" [ngClass]="timeLeftTextClass(ticket)">
           {{ getTimeLeftText(ticket) }}
         </div>
-
       </div>
     </div>
 
+    <!-- Quick Actions -->
+    <div class="flex flex-wrap gap-3 items-center">
+      <button *ngIf="ticket.status === 'Open'" (click)="startTicket()"
+              class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 shadow text-sm">
+        Start
+      </button>
+      <button *ngIf="ticket.status === 'In Progress'" (click)="resolveTicket()"
+              class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 shadow text-sm">
+        Resolve
+      </button>
+      <button *ngIf="ticket.status !== 'Closed'" (click)="closeTicket()"
+              class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 shadow text-sm">
+        Close
+      </button>
+
+      <button (click)="editMode = !editMode"
+              class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 text-sm ml-2">
+        {{ editMode ? 'Cancel Edit' : 'Edit Assignment & Add Docs' }}
+      </button>
+
+      <button (click)="toggleHistory()"
+              class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 text-sm ml-2">
+        {{ showHistory ? 'Hide History' : 'View History' }}
+      </button>
+    </div>
+
+    <!-- Editable Fields -->
+    <div *ngIf="editMode" class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+      <div class="flex flex-col">
+        <label class="text-sm font-medium mb-1">Status:</label>
+        <select [(ngModel)]="ticket.status" class="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+          <option>Open</option>
+          <option>In Progress</option>
+          <option>Resolved</option>
+          <option>Closed</option>
+        </select>
+      </div>
+      <div class="flex flex-col">
+        <label class="text-sm font-medium mb-1">Team:</label>
+        <select [(ngModel)]="ticket.assignedToTeam" class="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+          <option *ngFor="let t of teams">{{ t }}</option>
+        </select>
+      </div>
+      <div class="flex flex-col">
+        <label class="text-sm font-medium mb-1">Group:</label>
+        <select [(ngModel)]="ticket.assignedToGroup" class="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+          <option *ngFor="let g of groups">{{ g }}</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Upload Docs -->
+    <div *ngIf="editMode" class="mt-4">
+      <label class="text-sm font-medium mb-1 block">Add Documents:</label>
+      <input type="file" (change)="onFileSelected($event)" multiple
+             class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500" />
+      <button (click)="uploadFiles()"
+              class="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm shadow">
+        Upload
+      </button>
+    </div>
+
     <!-- Attachments -->
-    <div *ngIf="ticket.attachments?.length" class="mb-6">
+    <div *ngIf="ticket.attachments?.length" class="mt-6">
       <h4 class="text-sm font-semibold text-gray-700 mb-2">Attachments:</h4>
-      <ul class="list-disc list-inside text-sm text-gray-600">
-        <li *ngFor="let att of ticket.attachments" class="flex items-center justify-between">
+      <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+        <li *ngFor="let att of ticket.attachments" class="flex justify-between items-center p-1 rounded hover:bg-gray-50">
           <span>{{ att.name || att }}</span>
           <div class="flex gap-2">
             <button (click)="openAttachment(att)"
@@ -70,71 +137,10 @@
       </ul>
     </div>
 
-    <!-- Action Buttons (only for assigned user) -->
-    <div class="flex flex-col md:flex-row gap-3 mb-6">
-      
-      <!-- Ticket Status -->
-      <div class="flex items-center gap-2">
-        <label class="text-sm font-medium">Status:</label>
-        <select [(ngModel)]="ticket.status"
-                class="px-3 py-1 border rounded text-sm"
-                (change)="updateStatus(ticket.status)">
-          <option>Open</option>
-          <option>In Progress</option>
-          <option>Resolved</option>
-          <option>Closed</option>
-        </select>
-      </div>
-
-      <!-- Assigned User -->
-      <div class="flex items-center gap-2">
-        <label class="text-sm font-medium">Assign to:</label>
-        <input [(ngModel)]="ticket.assignedToUser"
-               placeholder="User Email"
-               class="px-3 py-1 border rounded text-sm" />
-        <button (click)="reassignUser()"
-                class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
-          Change
-        </button>
-      </div>
-
-      <!-- Team -->
-      <div class="flex items-center gap-2">
-        <label class="text-sm font-medium">Team:</label>
-        <input [(ngModel)]="ticket.assignedToTeam"
-               placeholder="Team Name"
-               class="px-3 py-1 border rounded text-sm" />
-      </div>
-
-      <!-- Group -->
-      <div class="flex items-center gap-2">
-        <label class="text-sm font-medium">Group:</label>
-        <input [(ngModel)]="ticket.assignedToGroup"
-               placeholder="Group Name"
-               class="px-3 py-1 border rounded text-sm" />
-      </div>
-
-      <!-- Start / Resolve / Close buttons -->
-      <div class="flex gap-2">
-        <button *ngIf="ticket.status === 'Open'" (click)="startTicket()"
-                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-          Start
-        </button>
-        <button *ngIf="ticket.status === 'In Progress'" (click)="resolveTicket()"
-                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
-          Resolve
-        </button>
-        <button *ngIf="ticket.status !== 'Closed'" (click)="closeTicket()"
-                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
-          Close
-        </button>
-      </div>
-    </div>
-
     <!-- Comments -->
     <div class="border-t border-gray-200 pt-4">
       <h4 class="text-sm font-semibold text-gray-700 mb-2">Comments:</h4>
-      <div *ngFor="let c of ticket.comments; let i = index" class="mb-2 flex justify-between items-center">
+      <div *ngFor="let c of ticket.comments; let i = index" class="mb-2 flex justify-between items-center p-2 rounded hover:bg-gray-50">
         <p class="text-sm text-gray-800"><strong>{{ c.commenter }}:</strong> {{ c.comment }}</p>
         <button *ngIf="c.commenter === currentUserEmail"
                 (click)="editComment(i)"
@@ -145,12 +151,27 @@
 
       <div *ngIf="currentUserEmail === ticket.assignedToUser" class="mt-3 flex gap-2">
         <input [(ngModel)]="newComment" placeholder="Add a comment..."
-               class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm" />
+               class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500" />
         <button (click)="addComment()"
-                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm">
+                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm shadow">
           Add
         </button>
       </div>
+    </div>
+
+    <!-- Ticket History -->
+    <div *ngIf="showHistory" class="border-t border-gray-200 pt-4">
+      <h4 class="text-sm font-semibold text-gray-700 mb-2">Ticket History:</h4>
+      <ul class="text-sm space-y-2">
+        <li *ngFor="let h of ticketHistory" class="flex justify-between items-center p-2 rounded shadow-sm"
+            [ngClass]="{'bg-green-50': h.action==='STATUS_CHANGED', 'bg-yellow-50': h.action==='CREATED', 'bg-red-50': h.action==='CLOSED'}">
+          <span class="text-gray-800">
+            {{ h.timestamp | date:'short' }} - {{ h.changedBy }}: {{ h.action }}
+            <span *ngIf="h.fromValue">({{ h.fromValue }} → {{ h.toValue }})</span>
+            <span *ngIf="!h.fromValue">→ {{ h.toValue }}</span>
+          </span>
+        </li>
+      </ul>
     </div>
 
   </div>

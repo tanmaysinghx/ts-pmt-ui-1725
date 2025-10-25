@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -7,25 +7,36 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-ticket-description',
   templateUrl: './ticket-description.component.html',
-  styleUrl: './ticket-description.component.scss',
+  styleUrls: ['./ticket-description.component.scss'],
+  standalone: true,
   imports: [CommonModule, FormsModule]
 })
 export class TicketDescriptionComponent implements OnInit {
-reassignUser() {
-throw new Error('Method not implemented.');
-}
   ticket: any = {};
   currentUserEmail: string = 'charlie@example.com';
   newComment: string = '';
+  newDescription: string = '';
   editMode: boolean = false;
+  showHistory: boolean = false;
+  ticketHistory: any[] = [];
+  uploadedFiles: File[] = [];
+  dummyPdf = '/assets/dummy.pdf';
 
-  constructor(private router: Router, private route: ActivatedRoute, private http: HttpClient) {}
+  // Dropdowns
+  statusOptions: string[] = ['Open', 'In Progress', 'Resolved', 'Closed'];
+  teams: string[] = [];
+  groups: string[] = [];
+
+  constructor(private route: ActivatedRoute, private http: HttpClient) { }
 
   ngOnInit() {
-    const ticketId = this.route.snapshot.params['ticketId'];
+    const ticketId = this.route.snapshot.params['ticketId'] || 'TCKT000002';
     this.loadTicket(ticketId);
+    this.loadTeamOptions();
+    this.loadGroupOptions();
   }
 
+  // --- Load ticket ---
   loadTicket(ticketId: string) {
     const url = `http://localhost:1674/api/v1/tickets/get-ticket/${ticketId}`;
     this.http.get<any>(url).subscribe({
@@ -35,27 +46,40 @@ throw new Error('Method not implemented.');
           ...t,
           dueDate: t.dueDate ? new Date(t.dueDate) : null,
           comments: t.comments || [],
-          attachments: t.attachments || [],
-          tags: t.tags || []
+          attachments: t.attachments || []
         };
       },
       error: (err) => console.error('Failed to load ticket:', err)
     });
   }
 
-  // --- Time left / priority helpers ---
+  loadTeamOptions() {
+    const url = `http://localhost:1674/api/v1/tickets/team-options`;
+    this.http.get<any>(url).subscribe({
+      next: (res) => this.teams = res?.data?.teams || [],
+      error: (err) => console.error('Failed to load teams', err)
+    });
+  }
+
+  loadGroupOptions() {
+    const url = `http://localhost:1674/api/v1/tickets/group-options`;
+    this.http.get<any>(url).subscribe({
+      next: (res) => this.groups = res?.data?.groups || [],
+      error: (err) => console.error('Failed to load groups', err)
+    });
+  }
+
+  // --- Time & Priority ---
   getDaysLeft(dueDate: Date | string | null): number {
     if (!dueDate) return 0;
     const now = new Date().getTime();
     const due = new Date(dueDate).getTime();
-    const diffMs = due - now;
-    return Math.max(Math.ceil(diffMs / (1000 * 60 * 60 * 24)), 0);
+    return Math.max(Math.ceil((due - now) / (1000 * 60 * 60 * 24)), 0);
   }
 
   getTimeLeftText(ticket: any): string {
     const days = this.getDaysLeft(ticket.dueDate);
-    if (days === 0) return '⏰ Overdue!';
-    return `⏰ Due in ${days} day${days > 1 ? 's' : ''}`;
+    return days === 0 ? '⏰ Overdue!' : `⏰ Due in ${days} day${days > 1 ? 's' : ''}`;
   }
 
   timeLeftTextClass(ticket: any): string {
@@ -84,17 +108,32 @@ throw new Error('Method not implemented.');
     }
   }
 
-  // --- Ticket Actions ---
-  startTicket() { this.updateStatus('In Progress'); }
-  resolveTicket() { this.updateStatus('Resolved'); }
-  closeTicket() { this.updateStatus('Closed'); }
-
+  // --- Status & Assignment ---
   updateStatus(newStatus: string) {
     const url = `http://localhost:1674/api/v1/tickets/update-status/${this.ticket.id}`;
     this.http.post(url, { status: newStatus }).subscribe({
       next: () => this.ticket.status = newStatus,
       error: (err) => console.error('Failed to update status:', err)
     });
+  }
+
+  reassignTicket() {
+    const url = `http://localhost:1674/api/v1/tickets/reassign-user/${this.ticket.id}`;
+    this.http.post(url, {
+      assignedToUser: this.ticket.assignedToUser,
+      assignedToTeam: this.ticket.assignedToTeam,
+      assignedToGroup: this.ticket.assignedToGroup
+    }).subscribe({
+      next: () => console.log('Ticket reassigned successfully'),
+      error: (err) => console.error('Failed to reassign ticket:', err)
+    });
+  }
+
+  // --- Description ---
+  addNewDescription() {
+    if (!this.newDescription.trim()) return;
+    this.ticket.description += `\n__________________________________________\n${this.newDescription}`;
+    this.newDescription = '';
   }
 
   // --- Comments ---
@@ -106,38 +145,51 @@ throw new Error('Method not implemented.');
         this.ticket.comments.push({ commenter: this.currentUserEmail, comment: this.newComment });
         this.newComment = '';
       },
-      error: (err) => console.error('Failed to add comment:', err)
+      error: err => console.error('Failed to add comment:', err)
     });
   }
 
   editComment(index: number) {
     const updated = prompt('Edit your comment:', this.ticket.comments[index].comment);
-    if (updated !== null) {
-      const url = `http://localhost:1674/api/v1/tickets/update-comment/${this.ticket.id}`;
-      this.http.post(url, { index, comment: updated }).subscribe({
-        next: () => this.ticket.comments[index].comment = updated,
-        error: (err) => console.error('Failed to update comment:', err)
-      });
-    }
-  }
-
-  // --- Edit Ticket ---
-  toggleEdit() { this.editMode = !this.editMode; }
-
-  saveChanges() {
-    const url = `http://localhost:1674/api/v1/tickets/update-ticket/${this.ticket.id}`;
-    this.http.post(url, this.ticket).subscribe({
-      next: () => { this.editMode = false; console.log('Ticket updated'); },
-      error: (err) => console.error('Failed to save ticket changes:', err)
+    if (!updated) return;
+    const url = `http://localhost:1674/api/v1/tickets/edit-comment/${this.ticket.id}`;
+    this.http.post(url, { index, comment: updated }).subscribe({
+      next: () => this.ticket.comments[index].comment = updated,
+      error: err => console.error('Failed to edit comment:', err)
     });
   }
 
-  // --- Attachments (placeholders) ---
-  openAttachment(att: any) {
-    alert('Opening attachment: ' + (att.name || att));
+  // --- Ticket History ---
+  toggleHistory() {
+    this.showHistory = !this.showHistory;
+    if (this.showHistory && this.ticketHistory.length === 0) {
+      this.fetchTicketHistory();
+    }
   }
 
-  downloadAttachment(att: any) {
-    alert('Downloading attachment: ' + (att.name || att));
+  fetchTicketHistory() {
+    // const url = `http://localhost:1674/api/v1/tickets/get-ticket-history/${this.ticket.id}`;
+    const url = "http://localhost:1674/api/v1/tickets/get-ticket-history/TCKT000002";
+    this.http.get<any>(url).subscribe({
+      next: res => this.ticketHistory = res?.data?.ticketHistory || [],
+      error: err => console.error('Failed to fetch ticket history:', err)
+    });
   }
+
+  // --- Attachments ---
+  onFileSelected(event: any) {
+    this.uploadedFiles = Array.from(event.target.files);
+  }
+
+  uploadFiles() {
+    console.log('Uploading files:', this.uploadedFiles);
+  }
+
+  openAttachment(att: any) { console.log('Open attachment:', att); }
+  downloadAttachment(att: any) { console.log('Download attachment:', att); }
+
+  // --- Ticket Lifecycle ---
+  startTicket() { this.updateStatus('In Progress'); }
+  resolveTicket() { this.updateStatus('Resolved'); }
+  closeTicket() { this.updateStatus('Closed'); }
 }
