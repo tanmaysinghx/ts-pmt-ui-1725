@@ -50,7 +50,7 @@ export class TicketService {
   }
 
   updateTicket(ticketId: string, payload: any): Observable<any> {
-    const apiUrl = environment.apiGatewayService + `/trigger-workflow/WF1674E20006?apiEndpoint=/api/v1/tickets/update-ticket/${ticketId}`;
+    const apiUrl = environment.apiGatewayService + `/trigger-workflow/WF1674E20008?apiEndpoint=/api/v1/tickets/modify-ticket/${ticketId}`;
     return this.http.post<any>(apiUrl, payload);
   }
 

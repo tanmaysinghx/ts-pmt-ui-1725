@@ -18,6 +18,7 @@ export class TicketDescriptionComponent implements OnInit {
   teams: any[] = [];
   groups: any[] = [];
   uploadedFiles: File[] = [];
+  originalTicketData: any = {};
 
   // ========== User & Input State ==========
   currentUserEmail: string = localStorage.getItem('user-email') || '';
@@ -73,7 +74,7 @@ export class TicketDescriptionComponent implements OnInit {
             attachments: t.attachments || []
           };
         }
-        console.log("Loaded ticket:", this.ticket);
+        this.originalTicketData = JSON.parse(JSON.stringify(this.ticket));
       },
       error: (err) => console.error('Failed to load ticket:', err)
     });
@@ -214,17 +215,57 @@ export class TicketDescriptionComponent implements OnInit {
     });
   }
 
-  updateTicket(): void {
-    const payload = {
-      assignedToUser: this.ticket.assignedToUser,
-      assignedToTeam: this.ticket.assignedToTeam,
-      assignedToGroup: this.ticket.assignedToGroup
-    };
+  updateTicket(ticketData: any): any {
+    if (!ticketData || !this.originalTicketData) return null;
 
-    this.ticketService.updateTicket(this.ticket.ticketId, payload).subscribe({
-      next: () => console.log('Ticket reassigned successfully'),
-      error: (err) => console.error('Failed to reassign ticket:', err)
+    const changedFields: any = {};
+    const changedKeys: string[] = [];
+
+    Object.keys(ticketData).forEach((key) => {
+      const oldVal = this.originalTicketData[key];
+      const newVal = ticketData[key];
+
+      // Compare complex and primitive values
+      if (Array.isArray(newVal)) {
+        if (JSON.stringify(oldVal || []) !== JSON.stringify(newVal)) {
+          changedFields[key] = newVal;
+          changedKeys.push(key);
+        }
+      } else if (typeof newVal === 'object' && newVal !== null) {
+        if (JSON.stringify(oldVal || {}) !== JSON.stringify(newVal)) {
+          changedFields[key] = newVal;
+          changedKeys.push(key);
+        }
+      } else if (oldVal !== newVal) {
+        changedFields[key] = newVal;
+        changedKeys.push(key);
+      }
     });
+
+    // Always mark updater
+    changedFields.lastUpdatedBy = this.currentUserEmail;
+
+    if (changedKeys.length === 0) {
+      console.log('ℹ️ No changes detected, skipping update.');
+      return null;
+    }
+
+    console.log(`📝 Fields changed: [${changedKeys.join(', ')}]`);
+    console.log('📦 Payload to send:', changedFields);
+
+    // --- Call API with only changed values ---
+    this.ticketService.updateTicket(ticketData.ticketId, changedFields).subscribe({
+      next: (res) => {
+        console.log('✅ Ticket updated successfully:', res);
+        this.loadTicket(ticketData.ticketId); // Refresh ticket after update
+      },
+      error: (err) => {
+        console.error('❌ Failed to update ticket:', err);
+      }
+    });
+
+    // 🔙 Return changed payload for reuse
+    return changedFields;
   }
 
   // Primary status actions
@@ -268,13 +309,14 @@ export class TicketDescriptionComponent implements OnInit {
 
   // ========== Description Actions ==========
 
-  addNewDescription(): void {
+  addNewDescription(ticketData: any): void {
     if (!this.newDescription.trim()) return;
-
+    const userEmail = localStorage.getItem('user-email') || this.currentUserEmail;
     const separator = '\n' + '─'.repeat(40) + '\n';
     const timestamp = new Date().toLocaleString();
-    this.ticket.description += `${separator}[Updated ${timestamp}]\n${this.newDescription}`;
+    this.ticket.description += `${separator}[Updated ${timestamp} by ${userEmail}]\n${this.newDescription}`;
     this.newDescription = '';
+    this.updateTicket(ticketData);
   }
 
   // ========== Comment Actions ==========
