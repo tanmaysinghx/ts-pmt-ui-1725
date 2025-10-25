@@ -1,17 +1,20 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TicketService } from '../../services/ticket.service';
+import { SnackbarComponent } from '../../../../shared/components/snackbar/snackbar.component';
 
 @Component({
   selector: 'app-ticket-description',
   templateUrl: './ticket-description.component.html',
   styleUrls: ['./ticket-description.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule, FormsModule, SnackbarComponent]
 })
 export class TicketDescriptionComponent implements OnInit {
+  @ViewChild(SnackbarComponent) snackbar!: SnackbarComponent;
+
   // ========== Data Properties ==========
   ticket: any = {};
   ticketHistory: any[] = [];
@@ -35,15 +38,8 @@ export class TicketDescriptionComponent implements OnInit {
 
   // ========== Constants ==========
   statusOptions: string[] = [
-    'CREATED',
-    'ASSIGNED',
-    'OPEN',
-    'RETEST',
-    'CLOSED',
-    'REOPENED',
-    'ONHOLD',
-    'DUPLICATE',
-    'INVALID'
+    'CREATED', 'ASSIGNED', 'OPEN', 'RETEST', 'CLOSED',
+    'REOPENED', 'ONHOLD', 'DUPLICATE', 'INVALID'
   ];
 
   constructor(
@@ -60,8 +56,14 @@ export class TicketDescriptionComponent implements OnInit {
     }
   }
 
-  // ========== Data Loading ==========
+  // ========== Snackbar Helper ==========
+  private notify(message: string, type: 'success' | 'error' | 'info' = 'info', title: string = '') {
+    if (this.snackbar) {
+      this.snackbar.show(title, message, type, 3000, 'type1');
+    }
+  }
 
+  // ========== Data Loading ==========
   loadTicket(ticketId: string): void {
     this.ticketService.getTicketById(ticketId).subscribe({
       next: (res) => {
@@ -76,7 +78,10 @@ export class TicketDescriptionComponent implements OnInit {
         }
         this.originalTicketData = JSON.parse(JSON.stringify(this.ticket));
       },
-      error: (err) => console.error('Failed to load ticket:', err)
+      error: (err) => {
+        console.error('Failed to load ticket:', err);
+        this.notify('Failed to load ticket', 'error', 'Error');
+      }
     });
   }
 
@@ -95,7 +100,6 @@ export class TicketDescriptionComponent implements OnInit {
   }
 
   // ========== Time Calculations ==========
-
   getDaysLeft(dueDate: Date | string | null): number {
     if (!dueDate) return 0;
     const now = new Date().getTime();
@@ -108,8 +112,7 @@ export class TicketDescriptionComponent implements OnInit {
     return days === 0 ? '⏰ Overdue!' : `⏰ Due in ${days} day${days > 1 ? 's' : ''}`;
   }
 
-  // ========== CSS Class Helpers ==========
-
+  // ========== CSS Helpers ==========
   getHeaderClass(ticket: any): string {
     const days = this.getDaysLeft(ticket.dueDate);
     if (days === 0) return 'bg-gradient-to-r from-red-500 to-red-600';
@@ -200,7 +203,6 @@ export class TicketDescriptionComponent implements OnInit {
   }
 
   // ========== Ticket Actions ==========
-
   updateStatus(newStatus: string): void {
     if (!newStatus) return;
 
@@ -209,9 +211,12 @@ export class TicketDescriptionComponent implements OnInit {
     this.ticketService.updateTicketStatus(this.ticket.ticketId, newStatus, changedBy).subscribe({
       next: () => {
         this.ticket.status = newStatus;
-        console.log('Status updated successfully to:', newStatus);
+        this.notify(`Status updated to ${newStatus}`, 'success', 'Success');
       },
-      error: (err) => console.error('Failed to update status:', err)
+      error: (err) => {
+        console.error('Failed to update status:', err);
+        this.notify('Failed to update status', 'error', 'Error');
+      }
     });
   }
 
@@ -225,7 +230,6 @@ export class TicketDescriptionComponent implements OnInit {
       const oldVal = this.originalTicketData[key];
       const newVal = ticketData[key];
 
-      // Compare complex and primitive values
       if (Array.isArray(newVal)) {
         if (JSON.stringify(oldVal || []) !== JSON.stringify(newVal)) {
           changedFields[key] = newVal;
@@ -242,73 +246,36 @@ export class TicketDescriptionComponent implements OnInit {
       }
     });
 
-    // Always mark updater
     changedFields.lastUpdatedBy = this.currentUserEmail;
 
     if (changedKeys.length === 0) {
-      console.log('ℹ️ No changes detected, skipping update.');
+      this.notify('No changes detected', 'info', 'Info');
       return null;
     }
 
-    console.log(`📝 Fields changed: [${changedKeys.join(', ')}]`);
-    console.log('📦 Payload to send:', changedFields);
-
-    // --- Call API with only changed values ---
     this.ticketService.updateTicket(ticketData.ticketId, changedFields).subscribe({
-      next: (res) => {
-        console.log('✅ Ticket updated successfully:', res);
-        this.loadTicket(ticketData.ticketId); // Refresh ticket after update
+      next: () => {
+        this.notify('Ticket updated successfully', 'success', 'Success');
+        this.loadTicket(ticketData.ticketId);
       },
       error: (err) => {
-        console.error('❌ Failed to update ticket:', err);
+        console.error('Failed to update ticket:', err);
+        this.notify('Failed to update ticket', 'error', 'Error');
       }
     });
 
-    // 🔙 Return changed payload for reuse
     return changedFields;
   }
 
-  // Primary status actions
-  startTicket(): void {
-    this.updateStatus('OPEN');
-  }
-
-  closeTicket(): void {
-    const confirmed = confirm('Are you sure you want to close this ticket?');
-    if (confirmed) {
-      this.updateStatus('CLOSED');
-    }
-  }
-
-  reopenTicket(): void {
-    this.updateStatus('REOPENED');
-  }
-
-  // Secondary status actions
-  putOnHold(): void {
-    this.updateStatus('ONHOLD');
-  }
-
-  markAsRetest(): void {
-    this.updateStatus('RETEST');
-  }
-
-  markAsDuplicate(): void {
-    const confirmed = confirm('Are you sure this is a duplicate ticket?');
-    if (confirmed) {
-      this.updateStatus('DUPLICATE');
-    }
-  }
-
-  markAsInvalid(): void {
-    const confirmed = confirm('Are you sure this ticket is invalid?');
-    if (confirmed) {
-      this.updateStatus('INVALID');
-    }
-  }
+  startTicket(): void { this.updateStatus('OPEN'); }
+  closeTicket(): void { if (confirm('Are you sure you want to close this ticket?')) this.updateStatus('CLOSED'); }
+  reopenTicket(): void { this.updateStatus('REOPENED'); }
+  putOnHold(): void { this.updateStatus('ONHOLD'); }
+  markAsRetest(): void { this.updateStatus('RETEST'); }
+  markAsDuplicate(): void { if (confirm('Are you sure this is a duplicate ticket?')) this.updateStatus('DUPLICATE'); }
+  markAsInvalid(): void { if (confirm('Are you sure this ticket is invalid?')) this.updateStatus('INVALID'); }
 
   // ========== Description Actions ==========
-
   addNewDescription(ticketData: any): void {
     if (!this.newDescription.trim()) return;
     const userEmail = localStorage.getItem('user-email') || this.currentUserEmail;
@@ -320,25 +287,20 @@ export class TicketDescriptionComponent implements OnInit {
   }
 
   // ========== Comment Actions ==========
-
   addComment(): void {
     if (!this.newComment.trim()) return;
 
-    const payload = {
-      commenter: this.currentUserEmail,
-      comment: this.newComment
-    };
-
+    const payload = { commenter: this.currentUserEmail, comment: this.newComment };
     this.ticketService.addComment(this.ticket.ticketId, payload).subscribe({
       next: () => {
-        this.ticket.comments.push({
-          commenter: this.currentUserEmail,
-          comment: this.newComment,
-          timestamp: new Date()
-        });
+        this.ticket.comments.push({ ...payload, timestamp: new Date() });
+        this.notify('Comment added successfully', 'success', 'Success');
         this.newComment = '';
       },
-      error: (err) => console.error('Failed to add comment:', err)
+      error: (err) => {
+        console.error('Failed to add comment:', err);
+        this.notify('Failed to add comment', 'error', 'Error');
+      }
     });
   }
 
@@ -352,66 +314,52 @@ export class TicketDescriptionComponent implements OnInit {
     this.ticketService.editComment(this.ticket.ticketId, { index, comment: updated }).subscribe({
       next: () => {
         this.ticket.comments[index].comment = updated;
+        this.notify('Comment updated', 'success', 'Success');
       },
-      error: (err) => console.error('Failed to edit comment:', err)
+      error: (err) => {
+        console.error('Failed to edit comment:', err);
+        this.notify('Failed to edit comment', 'error', 'Error');
+      }
     });
   }
 
   assignTicket(ticketData: any): void {
     if (!ticketData) return;
-
-    this.ticketService.assignTicket(ticketData.ticketId, ticketData.assignedToUser, localStorage.getItem("user-email")).subscribe({
-      next: () => {
-        console.log('Ticket assigned successfully');
-      },
-      error: (err) => console.error('Failed to assign ticket:', err)
+    this.ticketService.assignTicket(ticketData.ticketId, ticketData.assignedToUser, this.currentUserEmail).subscribe({
+      next: () => this.notify('Ticket assigned successfully', 'success', 'Success'),
+      error: (err) => {
+        console.error('Failed to assign ticket:', err);
+        this.notify('Failed to assign ticket', 'error', 'Error');
+      }
     });
   }
 
-  // ========== History Actions ==========
-
+  // ========== History ==========
   toggleHistory(): void {
     this.showHistory = !this.showHistory;
-    if (this.showHistory && this.ticketHistory.length === 0) {
-      this.fetchTicketHistory();
-    }
+    if (this.showHistory && this.ticketHistory.length === 0) this.fetchTicketHistory();
   }
 
   fetchTicketHistory(): void {
-    console.log("Fetching history for ticket id:", this.ticket.ticketId);
-
     this.ticketService.getTicketHistory(this.ticket.ticketId).subscribe({
       next: (res) => {
-        if (res?.success) {
-          this.ticketHistory = res?.data?.downstreamResponse?.data?.ticketHistory || [];
-        }
+        if (res?.success) this.ticketHistory = res?.data?.downstreamResponse?.data?.ticketHistory || [];
       },
-      error: (err) => console.error('Failed to fetch ticket history:', err)
+      error: (err) => {
+        console.error('Failed to fetch ticket history:', err);
+        this.notify('Failed to fetch ticket history', 'error', 'Error');
+      }
     });
   }
 
   // ========== Attachment Actions ==========
+  onFileSelected(event: any): void { this.uploadedFiles = Array.from(event.target.files); }
 
-  onFileSelected(event: any): void {
-    this.uploadedFiles = Array.from(event.target.files);
-  }
+  uploadFiles(): void { this.notify('Uploading files...', 'info', 'Info'); }
 
-  uploadFiles(): void {
-    console.log('Uploading files:', this.uploadedFiles);
-    // TODO: Implement actual file upload
-  }
+  openAttachment(att: any): void { if (att.fileUrl) window.open(att.fileUrl, '_blank'); }
 
-  openAttachment(att: any): void {
-    console.log('Open attachment:', att);
-    // TODO: Implement attachment viewer
-  }
-
-  downloadAttachment(att: any): void {
-    console.log('Download attachment:', att);
-    // TODO: Implement file download
-  }
-
-  // ========== Attachment Helper Methods ==========
+  downloadAttachment(att: any): void { this.notify('Download attachment not implemented', 'info', 'Info'); }
 
   formatFileSize(bytes: number): string {
     if (!bytes) return 'Unknown';
@@ -420,35 +368,9 @@ export class TicketDescriptionComponent implements OnInit {
     return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + ' ' + sizes[i];
   }
 
-  isPDF(fileName: string): boolean {
-    return fileName?.toLowerCase().endsWith('.pdf');
-  }
-
-  isImage(fileName: string): boolean {
-    const ext = fileName?.toLowerCase();
-    return ext?.endsWith('.jpg') || ext?.endsWith('.jpeg') || ext?.endsWith('.png') || ext?.endsWith('.gif');
-  }
-
-  removeSelectedFile(index: number): void {
-    this.uploadedFiles.splice(index, 1);
-  }
-
-  viewAttachment(att: any): void {
-    // Open attachment in new tab or modal
-    if (att.fileUrl) {
-      window.open(att.fileUrl, '_blank');
-    } else {
-      console.log('View attachment:', att);
-      // TODO: Implement attachment viewer
-    }
-  }
-
-  deleteAttachment(att: any): void {
-    const confirmed = confirm(`Are you sure you want to delete ${att.fileName}?`);
-    if (confirmed) {
-      // TODO: Implement delete attachment API call
-      console.log('Delete attachment:', att);
-    }
-  }
-
+  isPDF(fileName: string): boolean { return fileName?.toLowerCase().endsWith('.pdf'); }
+  isImage(fileName: string): boolean { return ['.jpg', '.jpeg', '.png', '.gif'].some(ext => fileName.toLowerCase().endsWith(ext)); }
+  removeSelectedFile(index: number): void { this.uploadedFiles.splice(index, 1); }
+  viewAttachment(att: any): void { if (att.fileUrl) window.open(att.fileUrl, '_blank'); }
+  deleteAttachment(att: any): void { if (confirm(`Delete ${att.fileName}?`)) this.notify('Attachment delete not implemented', 'info', 'Info'); }
 }
