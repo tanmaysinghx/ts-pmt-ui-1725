@@ -1,24 +1,31 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DynamicTableComponent, TableColumn } from '../../../../shared/components/dynamic-ui/dynamic-table/dynamic-table.component';
 import { TicketService } from '../../services/ticket.service';
+import { SnackbarComponent } from '../../../../shared/components/snackbar/snackbar.component';
 
 @Component({
   selector: 'app-view-tickets',
   standalone: true,
-  imports: [CommonModule, FormsModule, DynamicTableComponent],
+  imports: [CommonModule, FormsModule, DynamicTableComponent, SnackbarComponent],
   templateUrl: './view-tickets.component.html',
   styleUrl: './view-tickets.component.scss'
 })
 export class ViewTicketsComponent implements OnInit {
+  @ViewChild(SnackbarComponent) snackbar!: SnackbarComponent;
+
   searchQuery: string = '';
   tableColumns: TableColumn[] = [];
   tickets: any[] = [];
   filters: { [key: string]: string } = {};
 
-  constructor(private readonly router: Router, private readonly ticketService: TicketService, private readonly cdr: ChangeDetectorRef) { }
+  constructor(
+    private readonly router: Router,
+    private readonly ticketService: TicketService,
+    private readonly cdr: ChangeDetectorRef
+  ) { }
 
   ngOnInit() {
     this.getCMSData();
@@ -48,15 +55,10 @@ export class ViewTicketsComponent implements OnInit {
     });
   }
 
-
   getAPIData() {
     this.ticketService.getAllTickets().subscribe({
       next: (response: any) => {
-        console.log("Raw API Response:", response);
         const tickets = response?.data?.downstreamResponse?.data?.tickets;
-
-        console.log("Data", tickets);
-
         if (Array.isArray(tickets)) {
           this.tickets = tickets.map(ticket => ({
             id: ticket.ticketId,
@@ -73,11 +75,8 @@ export class ViewTicketsComponent implements OnInit {
             assignedToUser: ticket.assignedToUser
           }));
         } else {
-          console.warn('Tickets array not found in response:', response);
           this.tickets = [];
         }
-
-        console.log('Mapped Tickets:', this.tickets);
       },
       error: (err: any) => {
         console.error('Failed to load tickets:', err);
@@ -87,6 +86,13 @@ export class ViewTicketsComponent implements OnInit {
   }
 
   onRowClick(ticket: any) {
-    this.router.navigate(['/ticket-description', ticket.id]);
+    this.snackbar.show(
+      'Info',
+      `Navigating to ticket #${ticket.id}. Status: ${ticket.status}`,
+      'info',
+      2000,
+      'type1'
+    );
+    setTimeout(() => this.router.navigate([`/tickets/ticket-description/${ticket.id}`]), 2000);
   }
 }
