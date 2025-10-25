@@ -29,4 +29,14 @@ export class TicketService {
     const apiUrl: string = environment.apiGatewayService + '/trigger-workflow/WF1674E20005?apiEndpoint=/api/v1/tickets/get-all-tickets?status=&assignedToGroup=';
     return this.http.get<any[]>(apiUrl);
   }
+
+  getTicketById(ticketId: string): Observable<any> {
+    const apiUrl: string = environment.apiGatewayService + `/trigger-workflow/WF1674E20004?apiEndpoint=/api/v1/tickets/get-ticket/${ticketId}`;
+    return this.http.get<any>(apiUrl);
+  }
+
+  addComment(ticketId: string, payload: any): Observable<any> {
+    const apiUrl: string = environment.apiGatewayService + `/trigger-workflow/WF1674E20007?apiEndpoint=/api/v1/tickets/add-comments/${ticketId}`;
+    return this.http.post<any>(apiUrl, payload);
+  }
 }

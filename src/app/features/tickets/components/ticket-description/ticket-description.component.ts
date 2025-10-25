@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TicketService } from '../../services/ticket.service';
 
 @Component({
   selector: 'app-ticket-description',
@@ -21,50 +22,55 @@ export class TicketDescriptionComponent implements OnInit {
   ticketHistory: any[] = [];
   uploadedFiles: File[] = [];
   dummyPdf = '/assets/dummy.pdf';
+  myTicketId: any;
 
-  // Dropdowns
   statusOptions: string[] = ['Open', 'In Progress', 'Resolved', 'Closed'];
-  teams: string[] = [];
-  groups: string[] = [];
+  teams: any[] = [];
+  groups: any[] = [];
 
-  constructor(private route: ActivatedRoute, private http: HttpClient) { }
+  constructor(private readonly route: ActivatedRoute, private readonly http: HttpClient, private readonly ticketService: TicketService) { }
 
   ngOnInit() {
-    const ticketId = this.route.snapshot.params['ticketId'] || 'TCKT000002';
+    const ticketId = this.route.snapshot.params['ticketId'];
+    this.myTicketId = ticketId;
     this.loadTicket(ticketId);
     this.loadTeamOptions();
     this.loadGroupOptions();
   }
 
-  // --- Load ticket ---
   loadTicket(ticketId: string) {
-    const url = `http://localhost:1674/api/v1/tickets/get-ticket/${ticketId}`;
-    this.http.get<any>(url).subscribe({
+    this.ticketService.getTicketById(ticketId).subscribe({
       next: (res) => {
-        const t = res?.data?.ticket;
-        this.ticket = {
-          ...t,
-          dueDate: t.dueDate ? new Date(t.dueDate) : null,
-          comments: t.comments || [],
-          attachments: t.attachments || []
-        };
+        if (res.success) {
+          const t = res?.data?.downstreamResponse?.data?.ticket;
+          this.ticket = {
+            ...t,
+            dueDate: t.dueDate ? new Date(t.dueDate) : null,
+            comments: t.comments || [],
+            attachments: t.attachments || []
+          };
+        }
       },
       error: (err) => console.error('Failed to load ticket:', err)
     });
   }
 
   loadTeamOptions() {
-    const url = `http://localhost:1674/api/v1/tickets/team-options`;
+    const url = `http://localhost:1725/assets/data/assignedToTeam.json`;
     this.http.get<any>(url).subscribe({
-      next: (res) => this.teams = res?.data?.teams || [],
+      next: (res) => {
+        this.teams = res || [];
+      },
       error: (err) => console.error('Failed to load teams', err)
     });
   }
 
   loadGroupOptions() {
-    const url = `http://localhost:1674/api/v1/tickets/group-options`;
+    const url = `http://localhost:1725/assets/data/assignedToGroup.json`;
     this.http.get<any>(url).subscribe({
-      next: (res) => this.groups = res?.data?.groups || [],
+      next: (res) => {
+        this.groups = res || [];
+      },
       error: (err) => console.error('Failed to load groups', err)
     });
   }
@@ -138,9 +144,8 @@ export class TicketDescriptionComponent implements OnInit {
 
   // --- Comments ---
   addComment() {
-    if (!this.newComment.trim()) return;
-    const url = `http://localhost:1674/api/v1/tickets/add-comment/${this.ticket.id}`;
-    this.http.post(url, { commenter: this.currentUserEmail, comment: this.newComment }).subscribe({
+    let payload = { commenter: this.currentUserEmail, comment: this.newComment };
+    this.ticketService.addComment(this.myTicketId, payload).subscribe({
       next: () => {
         this.ticket.comments.push({ commenter: this.currentUserEmail, comment: this.newComment });
         this.newComment = '';
