@@ -325,4 +325,10 @@ export class PipelineOverviewComponent implements OnInit {
       // Call API to cancel pipeline
     }
   }
+
+  triggerWithParams(pipeline: Pipeline): void {
+  // Navigate to execution page which will show the build params modal
+  this.router.navigate(['/pipelines/pipelines-execution', pipeline.id]);
+}
+
 }
