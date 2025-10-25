@@ -1,17 +1,20 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TicketService } from '../../services/ticket.service';
+import { SnackbarComponent } from '../../../../shared/components/snackbar/snackbar.component';
 
 @Component({
   selector: 'app-search-tickets',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SnackbarComponent],
   templateUrl: './search-tickets.component.html',
   styleUrl: './search-tickets.component.scss'
 })
 export class SearchTicketsComponent implements OnInit {
+  @ViewChild(SnackbarComponent) snackbar!: SnackbarComponent;
+
   searchQuery: string = '';
   searched: boolean = false;
   recentSearches: string[] = [];
@@ -35,7 +38,7 @@ export class SearchTicketsComponent implements OnInit {
       next: (response: any) => {
         const tickets = response?.data?.downstreamResponse?.data?.tickets || [];
         this.allTickets = tickets.map((ticket: any) => ({
-          ...ticket, // keep all properties for replication
+          ...ticket,
           id: ticket.ticketId,
           tags: ticket.tags?.join(', ') || '',
           attachmentsCount: ticket.attachments?.length || 0,
@@ -77,17 +80,38 @@ export class SearchTicketsComponent implements OnInit {
     this.performSearch();
   }
 
-  goToTicket(ticketId: string) {
-    this.router.navigate(['/ticket-description', ticketId]);
+  /** Navigate to ticket with snackbar info */
+  goToTicket(ticket: any) {
+    console.log("ddmdm", ticket);
+    this.snackbar.show(
+      'Info',
+      `Navigating to ticket #${ticket}.`,
+      'info',
+      2000,
+      'type1'
+    );
+
+    setTimeout(() => {
+      this.router.navigate(['/tickets/ticket-description', ticket]);
+    }, 2000);
   }
 
+  /** Replicate ticket with snackbar notification */
   replicateTicket(ticket: any) {
     this.replicatingTicketId = ticket.id;
+
+    this.snackbar.show(
+      'Info',
+      `Replicating ticket #${ticket.id}. You will be redirected to create ticket form.`,
+      'info',
+      2000,
+      'type1'
+    );
 
     setTimeout(() => {
       this.replicatingTicketId = null;
       this.router.navigate(['/tickets/create-ticket'], {
-        state: { prefillTicket: ticket } // send all data
+        state: { prefillTicket: ticket }
       });
     }, 2000);
   }
