@@ -1,11 +1,10 @@
 <div class="px-4 py-10 mx-auto">
     <div class="bg-white border border-gray-200 rounded-xl shadow-sm px-6 py-8">
 
-        <!-- Title -->
         <h1 class="text-2xl font-bold text-gray-800 mb-6">Assigned Tickets</h1>
 
-        <!-- Search and Filters -->
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+        <!-- Filters -->
+        <div class="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
             <input type="text" [(ngModel)]="searchQuery" placeholder="🔍 Search by Title or Ticket #"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 text-sm" />
 
@@ -33,36 +32,46 @@
             </button>
         </div>
 
-        <!-- Ticket List -->
+        <!-- Tickets -->
         <div *ngIf="filteredAssignedTickets().length > 0" class="grid gap-4">
-            <div *ngFor="let ticket of filteredAssignedTickets()"
-                class="border border-gray-200 rounded-lg p-4 shadow-sm"
-                [ngClass]="{ 'border-red-400 bg-red-50': isUrgent(ticket) }">
+            <div *ngFor="let ticket of filteredAssignedTickets()" class="border rounded-lg p-4 shadow-sm"
+                [ngClass]="timeLeftClass(ticket)">
 
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+
+                    <!-- Left: Ticket Info -->
                     <div>
                         <h3 class="text-lg font-medium text-blue-600 hover:underline cursor-pointer"
                             (click)="goToTicket(ticket.id)">
                             #{{ ticket.id }} - {{ ticket.title }}
                         </h3>
+
                         <p class="text-sm text-gray-600 mt-1">
-                            Category: {{ ticket.category }} | Priority:
-                            <span [ngClass]="priorityClass(ticket.priority)">
-                                {{ ticket.priority }}
-                            </span>
-                            | Status: {{ ticket.status }}
+                            Group: {{ ticket.assignedToGroup || 'N/A' }} |
+                            Team: {{ ticket.assignedToTeam || 'N/A' }} |
+                            User: {{ ticket.assignedToUser || 'N/A' }}
                         </p>
-                        <p class="text-sm mt-1 text-gray-500">Due: {{ ticket.dueDate | date:'shortDate' }}</p>
+
+                        <p class="text-sm text-gray-600 mt-1">
+                            Priority: <span [ngClass]="priorityClass(ticket.priority)">
+                                {{ ticket.priority }}
+                            </span> | Status: {{ ticket.status }}
+                        </p>
+
+                        <p class="text-sm mt-1 text-gray-500">
+                            Due: {{ ticket.dueDate | date:'short' }}
+                        </p>
                     </div>
 
-                    <div *ngIf="isUrgent(ticket)" class="mt-2 md:mt-0 text-sm text-red-600 font-semibold">
-                        ⏰ Nearing Deadline!
+                    <!-- Right: Deadline / Urgency -->
+                    <div class="mt-2 md:mt-0 text-sm font-semibold" [ngClass]="timeLeftTextClass(ticket)">
+                        {{ getTimeLeftText(ticket) }}
                     </div>
+
                 </div>
             </div>
         </div>
 
-        <!-- Empty State -->
         <div *ngIf="filteredAssignedTickets().length === 0" class="text-gray-500 text-sm mt-6 text-center">
             No assigned tickets found matching your filters.
         </div>
