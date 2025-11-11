@@ -35,47 +35,47 @@ export class TicketService {
   // ========== Ticket CRUD ==========
 
   generateTicket(payload: any): Observable<any> {
-    const apiUrl = environment.apiGatewayService + '/trigger-workflow/WF1674E20001?apiEndpoint=/api/v1/tickets/create-ticket';
+    const apiUrl = environment.apiGatewayService + '/trigger-workflow/WF1674E10001?apiEndpoint=/api/v1/tickets/create-ticket';
     return this.http.post<any>(apiUrl, payload);
   }
 
   getAllTickets(): Observable<any[]> {
-    const apiUrl = environment.apiGatewayService + '/trigger-workflow/WF1674E20005?apiEndpoint=/api/v1/tickets/get-all-tickets?status=&assignedToGroup=';
+    const apiUrl = environment.apiGatewayService + '/trigger-workflow/WF1674E10005?apiEndpoint=/api/v1/tickets/get-all-tickets?status=&assignedToGroup=';
     return this.http.get<any[]>(apiUrl);
   }
 
   getTicketById(ticketId: string): Observable<any> {
-    const apiUrl = environment.apiGatewayService + `/trigger-workflow/WF1674E20004?apiEndpoint=/api/v1/tickets/get-ticket/${ticketId}`;
+    const apiUrl = environment.apiGatewayService + `/trigger-workflow/WF1674E10004?apiEndpoint=/api/v1/tickets/get-ticket/${ticketId}`;
     return this.http.get<any>(apiUrl);
   }
 
   updateTicket(ticketId: string, payload: any): Observable<any> {
-    const apiUrl = environment.apiGatewayService + `/trigger-workflow/WF1674E20008?apiEndpoint=/api/v1/tickets/modify-ticket/${ticketId}`;
+    const apiUrl = environment.apiGatewayService + `/trigger-workflow/WF1674E10008?apiEndpoint=/api/v1/tickets/modify-ticket/${ticketId}`;
     return this.http.post<any>(apiUrl, payload);
   }
 
   updateTicketStatus(ticketId: any, status: any, changedBy: any): Observable<any> {
-    const apiUrl = environment.apiGatewayService + `/trigger-workflow/WF1674E20003?apiEndpoint=/api/v1/tickets/update-status/${ticketId}/${status}?changedBy=${changedBy}`;
+    const apiUrl = environment.apiGatewayService + `/trigger-workflow/WF1674E10003?apiEndpoint=/api/v1/tickets/update-status/${ticketId}/${status}?changedBy=${changedBy}`;
     return this.http.post<any>(apiUrl, { status });
   }
 
   addComment(ticketId: string, payload: any): Observable<any> {
-    const apiUrl = environment.apiGatewayService + `/trigger-workflow/WF1674E20007?apiEndpoint=/api/v1/tickets/add-comments/${ticketId}`;
+    const apiUrl = environment.apiGatewayService + `/trigger-workflow/WF1674E10007?apiEndpoint=/api/v1/tickets/add-comments/${ticketId}`;
     return this.http.post<any>(apiUrl, payload);
   }
 
   editComment(ticketId: string, payload: { index: number; comment: string }): Observable<any> {
-    const apiUrl = environment.apiGatewayService + `/trigger-workflow/WF1674E20008?apiEndpoint=/api/v1/tickets/edit-comment/${ticketId}`;
+    const apiUrl = environment.apiGatewayService + `/trigger-workflow/WF1674E10008?apiEndpoint=/api/v1/tickets/edit-comment/${ticketId}`;
     return this.http.post<any>(apiUrl, payload);
   }
 
   getTicketHistory(ticketId: string): Observable<any> {
-    const apiUrl = environment.apiGatewayService + `/trigger-workflow/WF1674E20006?apiEndpoint=/api/v1/tickets/get-ticket-history/${ticketId}`;
+    const apiUrl = environment.apiGatewayService + `/trigger-workflow/WF1674E10006?apiEndpoint=/api/v1/tickets/get-ticket-history/${ticketId}`;
     return this.http.get<any>(apiUrl);
   }
 
   assignTicket(ticketId: any, assignedToUser: string, changedBy: any): Observable<any> {
-    const apiUrl = environment.apiGatewayService + `/trigger-workflow/WF1674E20002?apiEndpoint=/api/v1/tickets/assign-ticket/${ticketId}/${assignedToUser}/?changedBy=${changedBy}`;
+    const apiUrl = environment.apiGatewayService + `/trigger-workflow/WF1674E10002?apiEndpoint=/api/v1/tickets/assign-ticket/${ticketId}/${assignedToUser}/?changedBy=${changedBy}`;
     return this.http.post<any>(apiUrl, {});
   }
 }
